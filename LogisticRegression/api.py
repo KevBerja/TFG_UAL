@@ -165,6 +165,8 @@ def predictMassive():
         clf = jb.load('model.pkl')
         model_columns = jb.load('model_columns.pkl')
 
+        os.remove(file)
+
         if clf:
             try:
                 prediction = list(clf.predict(query))

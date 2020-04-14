@@ -1,6 +1,5 @@
 import sys
 import os
-import time
 import traceback
 import pandas as pd
 import joblib as jb
@@ -150,6 +149,8 @@ def predictMassive():
         clf = jb.load('model.pkl')
         model_columns = jb.load('model_columns.pkl')
 
+        os.remove(file)
+
         if clf:
             try:
                 prediction = list(clf.predict(query))
@@ -163,8 +164,6 @@ def predictMassive():
             
         else:
             return "You need to train the model first!"
-    
-        os.remove(file)
 
 if __name__ == '__main__':
     app.run(host = '0.0.0.0', port = 5000)
