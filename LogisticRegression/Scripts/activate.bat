@@ -33,3 +33,4 @@ if defined _OLD_CODEPAGE (
 )
 
 set "FLASK_APP=api.py"
+set "FLASK_RUN_PORT=5001"

@@ -1,0 +1,95 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<title>Nuevo modelo de datos</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<meta name="description" content="" />
+		<meta name="keywords" content="" />
+		<link rel="stylesheet" href="{{url_for('static', filename = 'css/main.css')}}" />
+		<link rel="stylesheet" href="{{url_for('static', filename = 'css/bootstrap.min.css')}}" />
+	</head>
+	<body class="is-preload">
+		<div class="container-fluid" style="min-height:100%; width:80%;">
+			{% with messages = get_flashed_messages() %}
+				{% if messages %}
+					{% for message in messages %}
+						<div class="alert alert-warning alert-dismissible" role="alert">
+							<button type = "button"class="close" data-dismiss= "alert" style ="box-shadow:none;" aria-label="Cerrar"><span aria-hidden="true">&times;</span></button>
+							{{ message }}
+						</div>
+					{% endfor %}
+				{% endif %}
+			{% endwith %}
+		</div>
+
+		<!-- Highlights -->
+		<section class="wrapper">
+			<div class="inner">
+				<header class="special">
+					<h2>Regresión Lineal</h2>
+					<p>Modelo de aprendizaje supervisado</p>
+				</header>
+			</div>
+
+		<!-- Main -->
+			<section id="main">
+				<div class="inner">
+					<div class="content">
+
+					<!-- Elements -->
+						<div class="row">
+							<div class="col-6 col-12-medium">
+									<h2>Modelo de Entrenamiento</h2>
+				
+									<p>Selección del fichero de datos en formato .csv del equipo para entrenar nuestro modelo predictivo.</p>
+									
+							</div>
+							<div class="col-6 col-12-medium">
+								<!-- Form -->
+									<h3>Subida del fichero</h3>
+									<form action="/uploadInitCSV" method="POST" enctype="multipart/form-data">
+										<div class="row gtr-uniform">
+											<div class="col-6 col-12-xsmall">
+												<input type="file" name="file_request" class="primary" />
+											</div>
+											<!-- Break -->
+											<div class="col-12">
+												<ul class="actions">	
+													<li><input type="submit" value="Subir archivo" class="primary" /></li>
+													<li><a href="/" class="button">Volver</a></li>
+												</ul>
+											</div>
+										</div>
+									</form>
+								</div>
+							</div>
+						</div>
+					</div>
+				</section>
+			</section>
+
+		<!-- Footer -->
+			<footer id="footer">
+				<div class="inner">
+					<div class="content">
+						<section>
+							<h3>MLaaS - Machine Learning as a Service</h3>
+							<p>Trabajo Fin de Grado.</p>
+						</section>
+					</div>
+					<div class="copyright">
+						&copy; Kevin Carracedo Vázquez. Grado en Ingeniería Informática. Universidad de Almería.
+					</div>
+				</div>
+			</footer>
+
+		<!-- Scripts -->
+		<script src="{{url_for('static', filename = 'js/jquery.min.js')}}"></script>
+		<script src="{{url_for('static', filename = 'js/browser.js')}}"></script>
+		<script src="{{url_for('static', filename = 'js/breakpoints.min.js')}}"></script>
+		<script src="{{url_for('static', filename = 'js/util.js')}}"></script>
+		<script src="{{url_for('static', filename = 'js/main.js')}}"></script>
+		<script src="{{url_for('static', filename = 'js/bootstrap.min.js')}}"></script>
+	</body>
+</html>

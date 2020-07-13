@@ -1,15 +1,19 @@
 import sys
 import os
-import traceback
+import traceback as tr
 import numpy as np
 import pandas as pd
 import joblib as jb
 
-from sklearn.linear_model import LinearRegression
-from flask import Flask, request, jsonify, render_template
+
+from flask import Flask, request, jsonify, render_template, redirect, session, flash
 from werkzeug.utils import secure_filename
+from sklearn.linear_model import LinearRegression
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
 
 app = Flask(__name__)
+app.secret_key = 'kcv239LinearRegression'
 
 
 @app.route('/')
@@ -19,7 +23,7 @@ def home():
 
 @app.route('/loadInitCSV', methods=['GET'])
 def upload_file():
-    return render_template('uploadCSVForTraining.html')
+    return render_template('subida_fichero.html')
 
 @app.route('/uploadInitCSV', methods=['POST'])
 def uploader():
@@ -32,24 +36,33 @@ def uploader():
         f_extension = filename[-1]
 
         if (f_name != "train" and f_extension != "csv"):
-            return "File not valid. Upload CSV file with the name --train.csv--!"
+
+            flash("ERROR - Archivo no válido. El fichero de datos de entrenamiento debe estar en formato .csv con el nombre --train.csv--")
+            
+            return redirect('/loadInitCSV')
 
         file_form.save(os.path.join('', file))
 
-        return "Upload file correctly!"
+        flash("Arhivo de datos subido con éxito")
+
+        return redirect('/loadInitCSV')
 
 
-@app.route('/deleteModel', methods=['POST'])
+@app.route('/deleteModel', methods=['GET'])
 def wipe():
-    if request.method == 'POST':
-        try:
-            os.remove('model.pkl')
-            os.remove('model_columns.pkl')
-            os.removed('train.csv')
-            return "Model removed correctly!"
+    try:
+        os.remove('model.pkl')
+        os.remove('model_columns.pkl')
+        os.removed('train.csv')
+        
+        flash("Modelo eliminado correctamente")
+        
+        return redirect('/')
 
-        except Exception as e:
-            return "Could not remove the model!"
+    except Exception as e:
+        flash("ERROR - No se ha podido eliminar el modelo. Por favor, verifica si el modelo que desea elminar existe")
+        
+        return redirect('/')
 
 
 @app.route('/train', methods=['GET'])
@@ -71,16 +84,25 @@ def train():
 
             jb.dump(clf, 'model.pkl')
 
-            return "Model trained correctly!"
+            flash("Modelo entrenado correctamente")
+
+            return redirect('/')
+
         
         else:
-            return "You need to upload train.csv file first!"
+            flash("ERROR - Se necesita primero subir el fichero de datos para entrenamiento")
+            
+            return redirect('/')
     
     else:
         if os.path.exists('model.pkl') and os.path.exists('model_columns.pkl'):
             # Loading model
             clf = jb.load('model.pkl')
             model_columns = jb.load('model_columns.pkl')
+            
+            flash("Modelo entrenado correctamente")
+            
+            return redirect('/')
 
 
 @app.route('/predict', methods=['POST'])
@@ -97,12 +119,17 @@ def predict():
                 output = round(prediction[0], 2)
 
                 return jsonify({"prediction": str(output)})
+            
             except Exception as e:
 
-                return jsonify({'error': str(e), 'trace': traceback.format_exc()})
+                return jsonify({'error': str(e), 'trace': tr.format_exc()})
         else:
-            return "Upload csv file and then train the model!"
+            return "ERROR - Se necesita primero subir el fichero de datos para entrenamiento y entrenar después al modelo"
 
+
+@app.route('/load_predict_form', methods=['GET'])
+def load_form():
+    return render_template('formulario_predict.html')
 
 @app.route('/predict_form', methods=['POST'])
 def predict_form():
@@ -116,18 +143,25 @@ def predict_form():
                 prediction = clf.predict(query)
                 output = round(prediction[0], 2)
 
-                return render_template('index.html', prediction='Employee Salary should be $ {}'.format(str(output)))
+                flash("Predicción realizada con éxito")
+
+                return render_template('formulario_predict.html', prediction="El total estimado de salario para el empleado es de {} euros".format(str(output)))
 
             except Exception as e:
 
-                return jsonify({'error': str(e), 'trace': traceback.format_exc()})
+                flash("ERROR - La predicción falló. Por favor, revise los datos introducidos")
+
+                return redirect('/load_predict_form')
         else:
-            return "Upload csv file and then train the model!"
+            
+            flash("ERROR - Debe entrenar primero un modelo")
+
+            return redirect('/load_predict_form')
 
 
 @app.route('/loadCSVToPredict', methods=['GET'])
 def uploadMassive():
-    return render_template('uploadCSVToPredict.html')
+    return render_template('prediccion_masiva.html')
 
 @app.route('/predictMassive', methods=['POST'])
 def predictMassive():
@@ -138,7 +172,9 @@ def predictMassive():
         f_extension = filename[-1]
 
         if (f_extension != "csv"):
-            return "File not allowed. Upload a CSV file valid!"
+            flash("ERROR - Archivo no válido. Suba un fichero en formato .csv válido")
+            
+            return redirect('/loadCSVToPredict')
 
         file_form.save(os.path.join('', file))
         
@@ -163,13 +199,16 @@ def predictMassive():
                 return jsonify({"prediction": prediction_str})
             
             except Exception as e:
+                flash("ERROR - Falló la predicción del fichero de datos")
 
-                return jsonify({'error': str(e), 'trace': traceback.format_exc()})
+                return redirect('/loadCSVToPredict')
             
         else:
-            return "You need to train the model first!"
+            flash("ERROR - Es necesario entrenar primero el modelo")
+            
+            return redirect('/loadCSVToPredict')
     
         
 
 if __name__ == "__main__":
-    app.run(host = '0.0.0.0', port = 5000)
+    app.run(debug=False, port = 5000, host="0.0.0.0")

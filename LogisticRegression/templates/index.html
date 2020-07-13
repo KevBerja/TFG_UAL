@@ -1,0 +1,116 @@
+<!DOCTYPE HTML>
+
+<html>
+	<head>
+		<title>MLaaS - LOGISTIC REGRESSION</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<meta name="description" content="" />
+		<meta name="keywords" content="" />
+		<link rel="stylesheet" href="{{url_for('static', filename = 'css/main.css')}}" />
+		<link rel="stylesheet" href="{{url_for('static', filename = 'css/bootstrap.min.css')}}" />
+	</head>
+	<body class="is-preload">
+		<div class="container-fluid" style="min-height:100%; width:80%;">
+			{% with messages = get_flashed_messages() %}
+				{% if messages %}
+					{% for message in messages %}
+						<div class="alert alert-warning alert-dismissible" role="alert">
+							<button type = "button"class="close" data-dismiss= "alert" style ="box-shadow:none;" aria-label="Cerrar"><span aria-hidden="true">&times;</span></button>
+							{{ message }}
+						</div>
+					{% endfor %}
+				{% endif %}
+			{% endwith %}
+			</div>
+
+		<!-- Highlights -->
+		<section class="wrapper">
+			<div class="inner">
+				<header class="special">
+					<h2>Regresión Logística</h2>
+					<p>Modelo de aprendizaje supervisado</p>
+				</header>
+				<div class="highlights">
+					<section>
+						<div class="content">
+							<header>
+								<a href="/loadInitCSV"><span class="label"><img src="{{url_for('static', filename = 'icons8-biotech-96.png')}}"/></span></a>
+								<h3>Nuevo modelo de datos</h3>
+							</header>
+							<p>Establezca un modelo de datos con los que se entrenará y evaluará para futuras predicciones mediante la subida de un fichero en formato .csv</p>
+						</div>
+					</section>
+					<section>
+						<div class="content">
+							<header>
+								<a href="" class="icon-cogs"><span class="label"><img src="{{url_for('static', filename = 'icons8-caja-100.png')}}" /></span></a>
+								<h3>Cargar un modelo existente</h3>
+							</header>
+							<p>Cargar un modelo previamente entrenado para realizar predicciones</p>
+						</div>
+					</section>
+					<section>
+						<div class="content">
+							<header>
+								<a href="/train" class="icon-cogs"><span class="label"><img src="{{url_for('static', filename = 'icons8-peptido-100.png')}}" /></span></a>
+								<h3>Entrenar modelo</h3>
+							</header>
+							<p>Entrena el conjunto de datos actual</p>
+						</div>
+					</section>
+					<section>
+						<div class="content">
+							<header>
+								<a href="/load_predict_form" class="icon-cogs"><span class="label"><img src="{{url_for('static', filename = 'icons8-aprendizaje-100.png')}}" /></span></a>
+								<h3>Realizar una predicción</h3>
+							</header>
+							<p>Mediante un formulario, realizar una predicción individual</p>
+						</div>
+					</section>
+					<section>
+						<div class="content">
+							<header>
+								<a href="/loadCSVToPredict" class="icon-cogs"><span class="label"><img src="{{url_for('static', filename = 'icons8-pensamiento-critico-100.png')}}" /></span></a>
+								<h3>Realizar una predicción masiva</h3>
+							</header>
+							<p>Mediante un conjunto de datos de entrada en formato .csv, realizar una predicción automática sobre cada uno de los registros</p>
+						</div>
+					</section>
+					<section>
+						<div class="content">
+							<header>
+								<a href="/deleteModel" class="icon-cogs"><span class="label"><img src="{{url_for('static', filename = 'icons8-eliminar-100.png')}}" /></span></a>
+								<h3>Eliminar modelo</h3>
+							</header>
+							<p>Eliminar el modelo actual</p>
+						</div>
+					</section>
+				</div>
+			</div>
+		</section>
+
+		<!-- Footer -->
+		<footer id="footer">
+			<div class="inner">
+				<div class="content">
+					<section>
+						<h3>MLaaS - Machine Learning as a Service</h3>
+						<p>Trabajo Fin de Grado.</p>
+					</section>
+				</div>
+				<div class="copyright">
+					&copy; Kevin Carracedo Vázquez. Grado en Ingeniería Informática. Universidad de Almería.
+				</div>
+			</div>
+		</footer>
+
+		<!-- Scripts -->
+			<script src="{{url_for('static', filename = 'js/jquery.min.js')}}"></script>
+			<script src="{{url_for('static', filename = 'js/browser.js')}}"></script>
+			<script src="{{url_for('static', filename = 'js/breakpoints.min.js')}}"></script>
+			<script src="{{url_for('static', filename = 'js/util.js')}}"></script>
+			<script src="{{url_for('static', filename = 'js/main.js')}}"></script>
+			<script src="{{url_for('static', filename = 'js/bootstrap.min.js')}}"></script>
+	</body>
+</html>
