@@ -53,14 +53,13 @@ def wipe():
     try:
         os.remove('model.pkl')
         os.remove('model_columns.pkl')
-        os.removed('train.csv')
         
         flash("Modelo eliminado correctamente")
         
         return redirect('/')
 
     except Exception as e:
-        flash("ERROR - No se ha podido eliminar el modelo. Por favor, verifica si el modelo que desea elminar existe")
+        flash("ERROR - No se ha podido eliminar el modelo. Por favor, verifica si el modelo que desea eliminar existe")
         
         return redirect('/')
 
@@ -172,7 +171,7 @@ def predictMassive():
         f_extension = filename[-1]
 
         if (f_extension != "csv"):
-            flash("ERROR - Archivo no válido. Suba un fichero en formato .csv válido")
+            flash("ERROR - Archivo no válido. Suba un fichero en formato .csv correcto")
             
             return redirect('/loadCSVToPredict')
 
@@ -211,4 +210,4 @@ def predictMassive():
         
 
 if __name__ == "__main__":
-    app.run(debug=False, port = 5000, host="0.0.0.0")
+    app.run(debug=False, port=5000, host="0.0.0.0")

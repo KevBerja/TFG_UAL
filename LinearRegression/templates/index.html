@@ -16,7 +16,7 @@
 			{% if messages %}
 				{% for message in messages %}
 					<div class="alert alert-warning alert-dismissible" role="alert">
-						<button type = "button"class="close" data-dismiss= "alert" style ="box-shadow:none;" aria-label="Cerrar"><span aria-hidden="true">&times;</span></button>
+						<button type="button" class="close" data-dismiss="alert" style="box-shadow:none;" aria-label="Cerrar"><span aria-hidden="true">&times;</span></button>
 						{{ message }}
 					</div>
 				{% endfor %}
@@ -28,7 +28,7 @@
 		<section class="wrapper">
 			<div class="inner">
 				<header class="special">
-					<h2>Regresión Lineal</h2>
+					<h1>Regresión Lineal</h1>
 					<p>Modelo de aprendizaje supervisado</p>
 				</header>
 				
@@ -39,7 +39,7 @@
 								<a href="/loadInitCSV"><span class="label"><img src="{{url_for('static', filename = 'icons8-biotech-96.png')}}"/></span></a>
 								<h3>Nuevo modelo de datos</h3>
 							</header>
-							<p>Establezca un modelo de datos con los que se entrenará y evaluará para futuras predicciones mediante la subida de un fichero en formato .csv</p>
+							<p>Establezca un modelo de datos con los que aprenderá y evaluará para futuras predicciones mediante la subida de un fichero en formato .csv</p>
 						</div>
 					</section>
 					<section>
@@ -48,7 +48,7 @@
 								<a href="" class="icon-cogs"><span class="label"><img src="{{url_for('static', filename = 'icons8-caja-100.png')}}" /></span></a>
 								<h3>Cargar un modelo existente</h3>
 							</header>
-							<p>Cargar un modelo previamente entrenado para realizar predicciones</p>
+							<p>Carga un modelo previamente entrenado para realizar predicciones</p>
 						</div>
 					</section>
 					<section>
@@ -66,7 +66,7 @@
 								<a href="/load_predict_form" class="icon-cogs"><span class="label"><img src="{{url_for('static', filename = 'icons8-aprendizaje-100.png')}}" /></span></a>
 								<h3>Realizar una predicción</h3>
 							</header>
-							<p>Mediante un formulario, realizar una predicción individual</p>
+							<p>Mediante un formulario, realiza una predicción simple</p>
 						</div>
 					</section>
 					<section>
@@ -75,7 +75,7 @@
 								<a href="/loadCSVToPredict" class="icon-cogs"><span class="label"><img src="{{url_for('static', filename = 'icons8-pensamiento-critico-100.png')}}" /></span></a>
 								<h3>Realizar una predicción masiva</h3>
 							</header>
-							<p>Mediante un conjunto de datos de entrada en formato .csv, realizar una predicción automática sobre cada uno de los registros</p>
+							<p>Mediante un conjunto de datos de entrada en formato .csv, realiza una predicción automática sobre cada uno de los registros</p>
 						</div>
 					</section>
 					<section>
@@ -84,7 +84,7 @@
 								<a href="/deleteModel" class="icon-cogs"><span class="label"><img src="{{url_for('static', filename = 'icons8-eliminar-100.png')}}" /></span></a>
 								<h3>Eliminar modelo</h3>
 							</header>
-							<p>Eliminar el modelo actual</p>
+							<p>Elimina el modelo actual</p>
 						</div>
 					</section>
 				</div>
@@ -94,14 +94,10 @@
 		<!-- Footer -->
 		<footer id="footer">
 			<div class="inner">
-				<div class="content">
-					<section>
-						<h3>MLaaS - Machine Learning as a Service</h3>
-						<p>Trabajo Fin de Grado.</p>
-					</section>
-				</div>
+				<h6 style="color:#aaaaaa;">MLaaS - Machine Learning as a Service</h6>
+				<p style="color:#aaaaaa;">Trabajo Fin de Grado</p>
 				<div class="copyright">
-					&copy; Kevin Carracedo Vázquez. Grado en Ingeniería Informática. Universidad de Almería.
+					<p style="color:#111111;">&copy; Kevin Carracedo Vázquez. Grado en Ingeniería Informática. Universidad de Almería.</p>
 				</div>
 			</div>
 		</footer>

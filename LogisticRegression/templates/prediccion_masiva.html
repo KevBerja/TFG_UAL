@@ -17,7 +17,7 @@
 				{% if messages %}
 					{% for message in messages %}
 						<div class="alert alert-warning alert-dismissible" role="alert">
-							<button type = "button"class="close" data-dismiss= "alert" style ="box-shadow:none;" aria-label="Cerrar"><span aria-hidden="true">&times;</span></button>
+							<button type="button" class="close" data-dismiss="alert" style="box-shadow:none;" aria-label="Cerrar"><span aria-hidden="true">&times;</span></button>
 							{{ message }}
 						</div>
 					{% endfor %}
@@ -28,7 +28,7 @@
 		<!-- Highlights -->
 		<div class="inner">
 			<header class="special">
-				<h2>Regresión Logística</h2>
+				<h1>Regresión Logística</h1>
 				<p>Modelo de aprendizaje supervisado</p>
 			</header>
 		</div>
@@ -40,20 +40,21 @@
 
 					<!-- Elements -->
 						<div class="row">
-							<div class="col-6 col-12-medium">
-									<h2>Predicción Masiva</h2>
-									<p>Importar un fichero de datos en formato .csv del equipo para entrenar nuestro modelo predictivo.</p>	
+							<div class="col-6 col-12-medium" style="background-color: #f5f5f5;">
+								<h3>Predicción Masiva</h3>
+								<br/>
+								<p>Subida de un archivo de datos de entrada en formato .csv para realizar una predicción automática sobre cada uno de los registros.</p>									
 							</div>
 							<div class="col-6 col-12-medium">
 								<!-- Form -->
-									<h3>Subida del fichero</h3>
+								<h5>Adjuntar fichero para predicción...</h5>
 									<form action="/predictMassive" method="POST" enctype="multipart/form-data">
 										<div class="row gtr-uniform">
-											<div class="col-6 col-12-xsmall">
+											<div class="col-6 col-12">
+												<br/>
 												<input type="file" name="file_request" class="primary" />
 											</div>
-											<!-- Break -->
-											<div class="col-12">
+											<div class="col-6 col-12">
 												<ul class="actions">	
 													<li><input type="submit" value="Ejecutar" class="primary" /></li>
 													<li><a href="/" class="button">Volver</a></li>
@@ -68,19 +69,15 @@
 				</section>
 
 		<!-- Footer -->
-			<footer id="footer">
-				<div class="inner">
-					<div class="content">
-						<section>
-							<h3>MLaaS - Machine Learning as a Service</h3>
-							<p>Trabajo Fin de Grado.</p>
-						</section>
-					</div>
-					<div class="copyright">
-						&copy; Kevin Carracedo Vázquez. Grado en Ingeniería Informática. Universidad de Almería.
-					</div>
+		<footer id="footer">
+			<div class="inner">
+				<h6 style="color:#aaaaaa;">MLaaS - Machine Learning as a Service</h6>
+				<p style="color:#aaaaaa;">Trabajo Fin de Grado</p>
+				<div class="copyright">
+					<p style="color:#111111;">&copy; Kevin Carracedo Vázquez. Grado en Ingeniería Informática. Universidad de Almería.</p>
 				</div>
-			</footer>
+			</div>
+		</footer>
 
 		<!-- Scripts -->
 		<script src="{{url_for('static', filename = 'js/jquery.min.js')}}"></script>
