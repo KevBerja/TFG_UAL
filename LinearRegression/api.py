@@ -5,12 +5,12 @@ import numpy as np
 import pandas as pd
 import joblib as jb
 
-
 from flask import Flask, request, jsonify, render_template, redirect, session, flash
 from werkzeug.utils import secure_filename
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
+
 
 app = Flask(__name__)
 app.secret_key = 'kcv239LinearRegression'

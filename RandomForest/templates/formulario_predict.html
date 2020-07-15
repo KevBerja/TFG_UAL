@@ -47,11 +47,8 @@
 							<div class="col-6 col-12-medium">
 								<!-- Form -->
 									<form action="/predict_form" method="POST" enctype="multipart/form-data">
-										<div class="row gtr-uniform">
-											<div class="col-6 col-12">
-												<input type="text" name="age" placeholder="Age" required="required" />
-    											<input type="text" name="sex" placeholder="Sex" required="required" />
-    											<input type="text" name="embarked" placeholder="Embarked" required="required" />
+										<div id="divForm" class="row gtr-uniform">
+											<div id="inputDynamic" class="col-6 col-12">
 											</div>
 											<div class="col-6 col-12">
 												<ul class="actions">	
@@ -72,10 +69,10 @@
 		<!-- Footer -->
 		<footer id="footer">
 			<div class="inner">
-				<h6 style="color:#aaaaaa;">MLaaS - Machine Learning as a Service</h6>
-				<p style="color:#aaaaaa;">Trabajo Fin de Grado</p>
+				<h6>MLaaS - Machine Learning as a Service</h6>
+				<p>Trabajo Fin de Grado</p>
 				<div class="copyright">
-					<p style="color:#111111;">&copy; Kevin Carracedo Vázquez. Grado en Ingeniería Informática. Universidad de Almería.</p>
+					<p>&copy; Kevin Carracedo Vázquez. Grado en Ingeniería Informática. Universidad de Almería.</p>
 				</div>
 			</div>
 		</footer>
@@ -87,5 +84,29 @@
 		<script src="{{url_for('static', filename = 'js/util.js')}}"></script>
 		<script src="{{url_for('static', filename = 'js/main.js')}}"></script>
 		<script src="{{url_for('static', filename = 'js/bootstrap.min.js')}}"></script>
+		<script src="{{url_for('static', filename = 'js/papaparse.js')}}"></script>
+		<script>
+			function arrayToInput(csvData) {
+				var div = $('#inputDynamic');
+				$(csvData).each(function (i, rowData) {
+					if (i == 0) {
+					$(rowData).each(function (j, cellData) {
+						console.log(rowData)
+						if(j < rowData.length-1) {
+							div.append($('<input type="text" name="'+cellData+'" placeholder="'+cellData+'" required="required" /><br/>'));
+						}
+					});
+				}
+				});
+			}
+
+			$.ajax({
+				type: "GET",
+				url: "{{url_for('static', filename='model_temp/train.csv')}}",
+				success: function (data) {
+					$('#divForm').append(arrayToInput(Papa.parse(data).data));
+				}
+			});
+		</script>
 	</body>
 </html>
