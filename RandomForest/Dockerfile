@@ -1,7 +1,13 @@
-FROM python:3.8.1
-VOLUME /TFG
-WORKDIR /TFG/RandomForest
-ADD . /TFG/RandomForest/
-RUN pip install -r requirements.txt
+FROM python:3.8
+
+WORKDIR /RandomForest
+
+COPY . /RandomForest
+
+RUN pip3 install --upgrade pip
+
+RUN pip3 install -r requirements.txt
+
 ENTRYPOINT ["python"]
-CMD [ "api.py" ]
+
+CMD ["api.py"]

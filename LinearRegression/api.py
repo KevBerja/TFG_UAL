@@ -43,7 +43,7 @@ def uploader():
 
         file_form.save(os.path.join('', file))
 
-        flash("Arhivo de datos subido con éxito")
+        flash("Archivo de datos subido con éxito")
 
         return redirect('/loadInitCSV')
 

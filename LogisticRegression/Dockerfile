@@ -1,7 +1,13 @@
-FROM python:3.8.1
-VOLUME /TFG
-WORKDIR /TFG/LogisticRegression
-ADD . /TFG/LogisticRegression/
-RUN pip install -r requirements.txt
+FROM python:3.8
+
+WORKDIR /LogisticRegression
+
+COPY . /LogisticRegression
+
+RUN pip3 install --upgrade pip
+
+RUN pip3 install -r requirements.txt
+
 ENTRYPOINT ["python"]
-CMD [ "api.py" ]
+
+CMD ["api.py"]

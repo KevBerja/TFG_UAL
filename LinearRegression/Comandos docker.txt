@@ -1,0 +1,21 @@
+docker build -t <nombre> .
+
+docker ps
+
+docker ps -a
+
+docker run -p <puertofisico>:<puertodocker> -d <nombre>
+
+docker start
+
+docker stop
+
+docker rm <idcontenedor>
+
+docker rm -f <nombrecontenedor>
+
+docker images
+
+docker rmi <idimagen>
+
+docker rmi -f <idimagen> 
