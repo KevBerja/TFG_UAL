@@ -70,7 +70,7 @@ def train():
         if os.path.exists('train.csv'):
             # Reading CSV data and loading the Dataset in a Dataframe Object
             df = pd.read_csv('train.csv', encoding='latin-1')
-            include = ['Pregnancies', 'Glucose', 'BloodPressure', 'SkinThickness', 'Insulin', 'BMI', 'DiabetesPedigreeFunction', 'Age', 'Outcome']
+            include = [str(x) for x in df.columns]                      
             dependent_variable = include[-1]
 
             # Reselecting the training data which were proccesed
@@ -78,7 +78,7 @@ def train():
             y = df[dependent_variable]
 
             # Logistic Regression classifier
-            clf = LogisticRegression()
+            clf = LogisticRegression(max_iter=1000)
 
             # Test Data and Training Data
             X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=42)
@@ -95,6 +95,7 @@ def train():
 
             # Saving the data columns from training
             model_columns = list(X_train.columns)
+            print(model_columns)
             jb.dump(model_columns, 'model_columns.pkl')
 
             flash("Modelo entrenado correctamente")
@@ -145,9 +146,27 @@ def predict_form():
     if request.method == 'POST':
         clf = jb.load('model.pkl')
         model_columns = jb.load('model_columns.pkl')
+        
         if clf:
             try:
-                json_ = list(request.form.values())
+                json_ = []
+
+                for v in list(request.form.values()):
+                    if v.isdigit():
+                        json_.append(int(v))
+                        continue
+                    if v.find(".") != -1:
+                        vx = v.split(".")
+
+                        if vx[0].isdigit() == True & vx[1].isdigit() == True:
+                            json_.append(float(v))
+                            continue
+                        else:
+                            json_.append(v)
+                            continue 
+                    else:
+                        json_.append(v)
+
                 query = [{'Pregnancies': int(json_[0]), 'Glucose': int(json_[1]), 'BloodPressure': int(json_[2]), 'SkinThickness': int(json_[3]), 'Insulin': int(json_[4]) ,'BMI': float(json_[5]), 'DiabetesPedigreeFunction': float(json_[6]), 'Age': int(json_[7])}]
                 query = pd.get_dummies(pd.DataFrame(query))
                 query = query.reindex(columns=model_columns, fill_value=0)

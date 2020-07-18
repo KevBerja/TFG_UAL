@@ -66,7 +66,7 @@ def train():
     if not os.path.exists('model.pkl') and not os.path.exists('model_columns.pkl'):
         if os.path.exists('train.csv'):    
             df = pd.read_csv('train.csv', encoding='latin-1')
-            include = ['Age', 'Sex', 'Embarked', 'Survived']
+            include = [str(x) for x in df.columns]  
             dependent_variable = include[-1]
             df_ = df[include]
 
@@ -145,10 +145,12 @@ def predict_form():
     if request.method == 'POST':
         clf = jb.load('model.pkl')
         model_columns = jb.load('model_columns.pkl')
+        print(model_columns)
+
         if clf:
             try:
                 json_ = list(request.form.values())
-                query = [{'Age': int(json_[0]), 'Sex': json_[1], 'Embarked': json_[2]}]
+                query = [{'Age': json_[0], 'Sex': json_[1], 'Embarked': json_[2]}]
                 query = pd.get_dummies(pd.DataFrame(query))
                 query = query.reindex(columns=model_columns, fill_value=0)
                 prediction = clf.predict(query)
@@ -194,7 +196,7 @@ def predictMassive():
         file_form.save(os.path.join('', file))
         
         df = pd.read_csv(file)
-        include = ['Age', 'Sex', 'Embarked']
+        include = [str(x) for x in df.columns]  
         df_ = df[include]
 
         categoricals = []
