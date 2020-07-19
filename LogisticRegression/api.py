@@ -95,7 +95,6 @@ def train():
 
             # Saving the data columns from training
             model_columns = list(X_train.columns)
-            print(model_columns)
             jb.dump(model_columns, 'model_columns.pkl')
 
             flash("Modelo entrenado correctamente")
@@ -108,14 +107,13 @@ def train():
             return redirect('/')
     
     else:
-        if os.path.exists('model.pkl') and os.path.exists('model_columns.pkl'):
-            # Loading model
-            clf = jb.load('model.pkl')
-            model_columns = jb.load('model_columns.pkl')
+        # Loading model
+        clf = jb.load('model.pkl')
+        model_columns = jb.load('model_columns.pkl')
 
-            flash("Modelo entrenado correctamente")
+        flash("Modelo entrenado correctamente")
             
-            return redirect('/')
+        return redirect('/')
 
 @app.route('/predict', methods=['POST'])
 def predict():
@@ -148,26 +146,34 @@ def predict_form():
         model_columns = jb.load('model_columns.pkl')
         
         if clf:
-            try:
-                json_ = []
+            try:        
+                keys = list(request.form)
+                values = list(request.form.values())
 
-                for v in list(request.form.values()):
+                json_ = {}
+                iter = 0
+
+                for v in values:
                     if v.isdigit():
-                        json_.append(int(v))
+                        json_[keys[iter]] = int(v)
+                        iter = iter + 1
                         continue
                     if v.find(".") != -1:
                         vx = v.split(".")
 
                         if vx[0].isdigit() == True & vx[1].isdigit() == True:
-                            json_.append(float(v))
+                            json_[keys[iter]] = float(v)
+                            iter = iter + 1
                             continue
                         else:
-                            json_.append(v)
+                            json_[keys[iter]] = v
+                            iter = iter + 1
                             continue 
                     else:
-                        json_.append(v)
+                        json_[keys[iter]] = v
+                        iter = iter + 1
 
-                query = [{'Pregnancies': int(json_[0]), 'Glucose': int(json_[1]), 'BloodPressure': int(json_[2]), 'SkinThickness': int(json_[3]), 'Insulin': int(json_[4]) ,'BMI': float(json_[5]), 'DiabetesPedigreeFunction': float(json_[6]), 'Age': int(json_[7])}]
+                query = [json_]
                 query = pd.get_dummies(pd.DataFrame(query))
                 query = query.reindex(columns=model_columns, fill_value=0)
                 prediction = clf.predict(query)

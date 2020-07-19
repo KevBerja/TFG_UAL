@@ -83,7 +83,6 @@ def train():
             x = df_ohe[df_ohe.columns.difference([dependent_variable])]
             y = df_ohe[dependent_variable]
 
-            # capture a list of columns that will be used for prediction
             model_columns = list(x.columns)
 
             jb.dump(model_columns, 'model_columns.pkl')
@@ -103,14 +102,13 @@ def train():
             return redirect('/')
     
     else:
-        if os.path.exists('model.pkl') and os.path.exists('model_columns.pkl'):
-            # Loading model
-            clf = jb.load('model.pkl')
-            model_columns = jb.load('model_columns.pkl')
+        # Loading model
+        clf = jb.load('model.pkl')
+        model_columns = jb.load('model_columns.pkl')
 
-            flash("Modelo entrenado correctamente")
+        flash("Modelo entrenado correctamente")
             
-            return redirect('/')
+        return redirect('/')
 
 
 @app.route('/predict', methods=['POST'])
@@ -149,8 +147,33 @@ def predict_form():
 
         if clf:
             try:
-                json_ = list(request.form.values())
-                query = [{'Age': json_[0], 'Sex': json_[1], 'Embarked': json_[2]}]
+                keys = list(request.form)
+                values = list(request.form.values())
+
+                json_ = {}
+                iter = 0
+
+                for v in values:
+                    if v.isdigit():
+                        json_[keys[iter]] = int(v)
+                        iter = iter + 1
+                        continue
+                    if v.find(".") != -1:
+                        vx = v.split(".")
+
+                        if vx[0].isdigit() == True & vx[1].isdigit() == True:
+                            json_[keys[iter]] = float(v)
+                            iter = iter + 1
+                            continue
+                        else:
+                            json_[keys[iter]] = v
+                            iter = iter + 1
+                            continue 
+                    else:
+                        json_[keys[iter]] = v
+                        iter = iter + 1
+                
+                query = [json_]
                 query = pd.get_dummies(pd.DataFrame(query))
                 query = query.reindex(columns=model_columns, fill_value=0)
                 prediction = clf.predict(query)

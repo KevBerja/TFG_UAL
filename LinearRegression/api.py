@@ -94,14 +94,13 @@ def train():
             return redirect('/')
     
     else:
-        if os.path.exists('model.pkl') and os.path.exists('model_columns.pkl'):
-            # Loading model
-            clf = jb.load('model.pkl')
-            model_columns = jb.load('model_columns.pkl')
+        # Loading model
+        clf = jb.load('model.pkl')
+        model_columns = jb.load('model_columns.pkl')
             
-            flash("Modelo entrenado correctamente")
+        flash("Modelo entrenado correctamente")
             
-            return redirect('/')
+        return redirect('/')
 
 
 @app.route('/predict', methods=['POST'])
