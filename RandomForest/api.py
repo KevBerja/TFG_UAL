@@ -88,7 +88,14 @@ def train():
             jb.dump(model_columns, 'model_columns.pkl')
 
             clf = RandomForestClassifier()
-            clf.fit(x, y)
+            
+            # Test Data and Training Data
+            x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.33, random_state=42)
+            clf.fit(x_train, y_train)
+
+            # Accuracy model score
+            y_pred = clf.predict(x_test)
+            score = accuracy_score(y_pred, y_test)
 
             jb.dump(clf, 'model.pkl')
 
@@ -102,7 +109,6 @@ def train():
             return redirect('/')
     
     else:
-        # Loading model
         clf = jb.load('model.pkl')
         model_columns = jb.load('model_columns.pkl')
 
@@ -143,7 +149,6 @@ def predict_form():
     if request.method == 'POST':
         clf = jb.load('model.pkl')
         model_columns = jb.load('model_columns.pkl')
-        print(model_columns)
 
         if clf:
             try:
@@ -245,7 +250,6 @@ def predictMassive():
                 return jsonify({'prediction': prediction_str})
             
             except Exception as e:
-
                 flash("ERROR - Falló la predicción del fichero de datos")
 
                 return redirect('/loadCSVToPredict')

@@ -72,14 +72,16 @@ def train():
             dataset['experience'].fillna(0, inplace=True)
             dataset['test_score'].fillna(dataset['test_score'].mean(), inplace=True)
 
-            X = dataset.iloc[:, :3]
+            x = dataset.iloc[:, :3]
+            print(x)
             y = dataset.iloc[:, -1]
+            print(y)
 
-            model_columns = list(X.columns)
+            model_columns = list(x.columns)
             jb.dump(model_columns, 'model_columns.pkl')
 
             clf = LinearRegression()
-            clf.fit(X, y)
+            clf.fit(x, y)
 
             jb.dump(clf, 'model.pkl')
 
@@ -94,7 +96,6 @@ def train():
             return redirect('/')
     
     else:
-        # Loading model
         clf = jb.load('model.pkl')
         model_columns = jb.load('model_columns.pkl')
             
