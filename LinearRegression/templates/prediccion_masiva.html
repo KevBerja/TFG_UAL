@@ -10,28 +10,27 @@
 		<link rel="stylesheet" href="{{url_for('static', filename = 'css/bootstrap.min.css')}}" />
 	</head>
 
+
 	<body class="is-preload">
 		<div class="container-fluid" style="min-height:100%; width:80%;">
 			{% with messages = get_flashed_messages() %}
 				{% if messages %}
 					{% for message in messages %}
 						<div class="alert alert-warning alert-dismissible" role="alert">
-							<button type="button" class="close" data-dismiss="alert" style ="box-shadow:none;" aria-label="Cerrar"><span aria-hidden="true">&times;</span></button>
+							<button type="button" class="close" data-dismiss="alert" style="box-shadow:none;" aria-label="Cerrar"><span aria-hidden="true">&times;</span></button>
 							{{ message }}
 						</div>
 					{% endfor %}
 				{% endif %}
 			{% endwith %}
 		</div>
-
+		
 		<!-- Highlights -->
 		<section class="wrapper">
-			<div class="inner">
-				<header class="special">
-					<h1>Regresión Lineal</h1>
-					<p>Modelo de aprendizaje supervisado</p>
-				</header>
-			</div>
+			<header class="special">
+				<h1>Regresión Lineal</h1>
+				<p>Modelo de aprendizaje supervisado</p>
+			</header>
 
 		<!-- Main -->
 			<section id="main">
@@ -41,9 +40,9 @@
 					<!-- Elements -->
 						<div class="row">
 							<div class="col-6 col-12-medium">
-									<h3>Predicción Masiva</h3>
-									<br/>
-									<p>Subida de un archivo de datos de entrada en formato .csv para realizar una predicción automática sobre cada uno de los registros.</p>									
+								<h3>Predicción Masiva</h3>
+								<br/>
+								<p>Subida de un archivo de datos de entrada en formato .csv para realizar una predicción automática sobre cada uno de los registros.</p>									
 							</div>
 							<div class="col-6 col-12-medium">
 								<!-- Form -->

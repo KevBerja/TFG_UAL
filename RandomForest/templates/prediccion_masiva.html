@@ -10,6 +10,7 @@
 		<link rel="stylesheet" href="{{url_for('static', filename = 'css/bootstrap.min.css')}}" />
 	</head>
 
+
 	<body class="is-preload">
 		<div class="container-fluid" style="min-height:100%; width:80%;">
 			{% with messages = get_flashed_messages() %}
@@ -23,15 +24,13 @@
 				{% endif %}
 			{% endwith %}
 		</div>
-
+		
 		<!-- Highlights -->
 		<section class="wrapper">
-			<div class="inner">
-				<header class="special">
-					<h1>Random Forest</h1>
-					<p>Modelo de aprendizaje supervisado</p>
-				</header>
-			</div>
+			<header class="special">
+				<h1>Random Forest</h1>
+				<p>Modelo de aprendizaje supervisado</p>
+			</header>
 
 		<!-- Main -->
 			<section id="main">
