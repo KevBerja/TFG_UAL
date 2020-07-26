@@ -1,5 +1,6 @@
 import sys
 import os
+import shutil
 import joblib as jb
 import traceback as tr
 import pandas as pd
@@ -40,7 +41,8 @@ def uploader():
 
             return redirect('/loadInitCSV')
 
-        file_form.save(os.path.join('', file))
+
+        file_form.save(os.path.join('', 'static/model_temp/' + file))
 
         flash("Archivo de datos subido con éxito")
 
@@ -50,8 +52,16 @@ def uploader():
 @app.route('/deleteModel', methods=['GET'])
 def wipe():
     try:
-        os.remove('model.pkl')
-        os.remove('model_columns.pkl')
+
+        folder_path = './static/model_temp' 
+        
+        for file_object in os.listdir(folder_path): 
+            file_object_path = os.path.join(folder_path, file_object) 
+            
+            if os.path.isfile(file_object_path): 
+                os.unlink(file_object_path) 
+            else: 
+                shutil.rmtree(file_object_path)
         
         flash("Modelo eliminado correctamente")
         
@@ -63,66 +73,71 @@ def wipe():
         return redirect('/')
 
 
-@app.route('/train', methods=['GET'])
-def train():    
-    if not os.path.exists('model.pkl') and not os.path.exists('model_columns.pkl'):
-        if os.path.exists('train.csv'):
-            df = pd.read_csv('train.csv', encoding='latin-1')
-            include = [str(x) for x in df.columns]  
-            dependent_variable = include[-1]
-            df_ = df[include]
+@app.route('/formTrain', methods=['GET'])
+def formTrain():
+    return render_template('train.html')
 
-            categoricals = []
+@app.route('/train', methods=['POST'])
+def train():
+    if request.method == 'POST':
+        if not os.path.exists('./static/model_temp/model.pkl') and not os.path.exists('./static/model_temp/model_columns.pkl'):
+            if os.path.exists('./static/model_temp/train.csv'):
+                df = pd.read_csv('./static/model_temp/train.csv', encoding='latin-1')
+                include = [str(x) for x in df.columns]  
+                dependent_variable = include[-1]
+                df_ = df[include]
 
-            for col, col_type in df_.dtypes.items():        
-                if col_type == 'O':
-                    categoricals.append(col)
-                else:
-                    df_[col].fillna(0, inplace=True)
+                categoricals = []
 
-            df_ohe = pd.get_dummies(df_, columns=categoricals, dummy_na=True)
+                for col, col_type in df_.dtypes.items():        
+                    if col_type == 'O':
+                        categoricals.append(col)
+                    else:
+                        df_[col].fillna(0, inplace=True)
 
-            x = df_ohe[df_ohe.columns.difference([dependent_variable])]
-            y = df_ohe[dependent_variable]
+                df_ohe = pd.get_dummies(df_, columns=categoricals, dummy_na=True)
 
-            model_columns = list(x.columns)
+                x = df_ohe[df_ohe.columns.difference([dependent_variable])]
+                y = df_ohe[dependent_variable]
 
-            jb.dump(model_columns, 'model_columns.pkl')
+                model_columns = list(x.columns)
 
-            clf = LogisticRegression(max_iter=1000)
+                jb.dump(model_columns, './static/model_temp/model_columns.pkl')
+
+                clf = LogisticRegression(max_iter=1000)
+                
+                # Test Data and Training Data
+                x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.33, random_state=42)
+                clf.fit(x_train, y_train)
+
+                # Accuracy model score
+                y_pred = clf.predict(x_test)
+                score = accuracy_score(y_pred, y_test)
+
+                jb.dump(clf, './static/model_temp/model.pkl')
+
+                flash("Modelo entrenado correctamente")
+
+                return redirect('/formTrain')
             
-            # Test Data and Training Data
-            x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.33, random_state=42)
-            clf.fit(x_train, y_train)
-
-            # Accuracy model score
-            y_pred = clf.predict(x_test)
-            score = accuracy_score(y_pred, y_test)
-
-            jb.dump(clf, 'model.pkl')
-
-            flash("Modelo entrenado correctamente")
-
-            return redirect('/')
-        
-        else:
-            flash("ERROR - Se necesita primero subir el fichero de datos para entrenamiento")
-            
-            return redirect('/')
+            else:
+                flash("ERROR - Se necesita primero subir el fichero de datos para entrenamiento")
+                
+                return redirect('/formTrain')
     
     else:
-        clf = jb.load('model.pkl')
-        model_columns = jb.load('model_columns.pkl')
+        clf = jb.load('./static/model_temp/model.pkl')
+        model_columns = jb.load('./static/model_temp/model_columns.pkl')
 
         flash("Modelo entrenado correctamente")
             
-        return redirect('/')
+        return redirect('/formTrain')
 
 @app.route('/predict', methods=['POST'])
 def predict():
     if request.method == 'POST':
-        clf = jb.load('model.pkl')
-        model_columns = jb.load('model_columns.pkl')
+        clf = jb.load('./static/model_temp/model.pkl')
+        model_columns = jb.load('./static/model_temp/model_columns.pkl')
         if clf:
             try:
                 json_ = request.json
@@ -145,8 +160,8 @@ def load_form():
 @app.route('/predict_form', methods=['POST'])
 def predict_form():
     if request.method == 'POST':
-        clf = jb.load('model.pkl')
-        model_columns = jb.load('model_columns.pkl')
+        clf = jb.load('./static/model_temp/model.pkl')
+        model_columns = jb.load('./static/model_temp/model_columns.pkl')
         
         if clf:
             try:        
