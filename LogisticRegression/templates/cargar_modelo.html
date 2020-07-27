@@ -1,7 +1,8 @@
+
 <!DOCTYPE HTML>
 <html>
 	<head>
-		<title>Realizar una predicción</title>
+		<title>Cargar modelo</title>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
 		<meta name="description" content="" />
@@ -36,35 +37,28 @@
 			<section id="main">
 				<div class="inner">
 					<div class="content">
-
-					<!-- Elements -->
-						<div class="row">
-							<div class="col-6 col-12-medium">
-								<h3>Predicción Simple</h3>
-								<br/>
-								<p>Realiza una predicción simple con el siguiente formulario.</p>
-							</div>
-							<div class="col-6 col-12-medium">
-								<!-- Form -->
-									<form action="/predict_form" method="POST" enctype="multipart/form-data">
-										<div id="divForm" class="row gtr-uniform">
-											<div id="inputDynamic" class="col-6 col-12">
-												{% for i in columns %}
-													<input type="text" name="{{ i }}" placeholder="{{ i }}" required="required" /><br/>
-												{% endfor %}
-											</div>
-											<div class="col-6 col-12">
-												<ul class="actions">	
-													<li><input type="submit" value="Ejecutar" class="primary" /></li>
-													<li><a href="/" class="button">Volver</a></li>
-												</ul>
-											</div>
-										</div>
-									</form>
-								<p>{{ prediction }}</p>
-							</div>
-						</div>
-					</div>
+                        <div class="table-wrapper">
+                            <table>
+                                <thead>
+                                    <tr>
+										<th>Modelo</th>
+										<th>Tipo</th>
+                                        <th>URL</th>
+                                    </tr>
+								</thead>
+                                <tbody>
+									{% for i in rows %}
+									<tr>
+										{% for row in i %}
+											<td>{{ row }}</td>
+										{% endfor %}
+										<td><input type="submit" value="Cargar" class="primary" /></td>
+									</tr>
+									{% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
 				</div>
 			</section>
 		</section>

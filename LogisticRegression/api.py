@@ -5,6 +5,7 @@ import joblib as jb
 import traceback as tr
 import pandas as pd
 import numpy as np
+import mysql.connector
 
 from flask import Flask, request, jsonify, render_template, redirect, session, flash
 from werkzeug.utils import secure_filename
@@ -41,12 +42,30 @@ def uploader():
 
             return redirect('/loadInitCSV')
 
+        os.makedirs('./static/model_temp', exist_ok=True)
 
         file_form.save(os.path.join('', 'static/model_temp/' + file))
 
         flash("Archivo de datos subido con éxito")
 
         return redirect('/loadInitCSV')
+
+
+@app.route('/loadModel', methods=['GET'])
+def loadModel():
+    mydb = mysql.connector.connect(
+        host="localhost",
+        user="root",
+        password="",
+        database="mlaas")
+
+    mycursor = mydb.cursor()
+
+    mycursor.execute("SELECT nombre, tipo, url FROM modelos")
+
+    myresult = mycursor.fetchall()
+
+    return render_template('cargar_modelo.html', rows = myresult)
 
 
 @app.route('/deleteModel', methods=['GET'])
@@ -80,8 +99,13 @@ def formTrain():
 @app.route('/train', methods=['POST'])
 def train():
     if request.method == 'POST':
+        model = list(request.form.values())
+
         if not os.path.exists('./static/model_temp/model.pkl') and not os.path.exists('./static/model_temp/model_columns.pkl'):
-            if os.path.exists('./static/model_temp/train.csv'):
+            if os.path.exists('./static/model_temp/train.csv'):   
+
+                os.makedirs('./static/models/' + model[0], exist_ok=True)
+
                 df = pd.read_csv('./static/model_temp/train.csv', encoding='latin-1')
                 include = [str(x) for x in df.columns]  
                 dependent_variable = include[-1]
@@ -125,13 +149,16 @@ def train():
                 
                 return redirect('/formTrain')
     
-    else:
-        clf = jb.load('./static/model_temp/model.pkl')
-        model_columns = jb.load('./static/model_temp/model_columns.pkl')
+        else:
+            os.makedirs('./static/models/' + model[0], exist_ok=True)
 
-        flash("Modelo entrenado correctamente")
-            
-        return redirect('/formTrain')
+            clf = jb.load('./static/model_temp/model.pkl')
+            model_columns = jb.load('./static/model_temp/model_columns.pkl')
+
+            flash("Modelo entrenado correctamente")
+                
+            return redirect('/formTrain')
+
 
 @app.route('/predict', methods=['POST'])
 def predict():
@@ -155,7 +182,11 @@ def predict():
 
 @app.route('/load_predict_form', methods=['GET'])
 def load_form():
-    return render_template('formulario_predict.html')
+    df = pd.read_csv('./static/model_temp/train.csv', encoding='latin-1')
+    columns = [str(x) for x in df.columns]
+    columns.pop()
+
+    return render_template('formulario_predict.html', columns = columns)
 
 @app.route('/predict_form', methods=['POST'])
 def predict_form():
@@ -179,7 +210,7 @@ def predict_form():
                     if v.find(".") != -1:
                         vx = v.split(".")
 
-                        if vx[0].isdigit() == True & vx[1].isdigit() == True:
+                        if vx[0].isdigit() == True and vx[1].isdigit() == True:
                             json_[keys[iter]] = float(v)
                             iter = iter + 1
                             continue
