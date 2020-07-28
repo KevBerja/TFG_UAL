@@ -1,7 +1,8 @@
+
 <!DOCTYPE HTML>
 <html>
 	<head>
-		<title>Nuevo modelo de datos</title>
+		<title>Cargar modelo</title>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
 		<meta name="description" content="" />
@@ -33,37 +34,33 @@
 			</div>
 
 		<!-- Main -->
-		<section id="main">
-			<div class="inner">
-				<div class="content">
-
-					<!-- Elements -->
-					<div class="row">
-						<div class="col-6 col-12-medium">
-							<h3>Subida de datos</h3>
-							<br/>
-							<p>Selección del fichero de datos en formato .csv del equipo para entrenar nuestro modelo predictivo.</p>
-						</div>
-						<div class="col-6 col-12-medium">
-							<!-- Form -->
-							<h5>Adjuntar fichero para entrenamiento...</h5>
-								<form action="/uploadInitCSV" method="POST" enctype="multipart/form-data">
-									<div class="row gtr-uniform">
-										<div class="col-6 col-12">
-											<br/>
-											<input type="file" name="file_request" class="primary" />
-										</div>
-										<div class="col-6 col-12">
-											<ul class="actions">	
-												<li><input type="submit" value="Subir archivo" class="primary" /></li>
-												<li><a href="/" class="button">Volver</a></li>
-											</ul>
-										</div>
-									</div>
-								</form>
-							</div>
-						</div>
-					</div>
+			<section id="main">
+				<div class="inner">
+					<div class="content">
+                        <div class="table-wrapper">
+                            <table>
+                                <thead>
+                                    <tr>
+										<th>Modelo</th>
+										<th>Tipo</th>
+                                        <th>URL</th>
+                                    </tr>
+								</thead>
+                                <tbody>
+									{% for i in rows %}
+										<form action="" method="POST" enctype="multipart/form-data">
+											<tr>
+												{% for row in i %}
+													<td>{{ row }}</td>
+												{% endfor %}
+												<td><input type="submit" value="Cargar modelo" class="primary" /></td>
+											</tr>
+										</form>
+									{% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
 				</div>
 			</section>
 		</section>

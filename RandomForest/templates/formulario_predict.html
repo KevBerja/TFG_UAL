@@ -9,7 +9,7 @@
 		<link rel="stylesheet" href="{{url_for('static', filename = 'css/main.css')}}" />
 		<link rel="stylesheet" href="{{url_for('static', filename = 'css/bootstrap.min.css')}}" />
 	</head>
-	<body class="is-preload">	
+	<body class="is-preload">
 		<div class="container-fluid" style="min-height:100%; width:80%;">
 			{% with messages = get_flashed_messages() %}
 				{% if messages %}
@@ -32,7 +32,7 @@
 				</header>
 			</div>
 
-		<!-- Main -->
+			<!-- Main -->
 			<section id="main">
 				<div class="inner">
 					<div class="content">
@@ -46,18 +46,21 @@
 							</div>
 							<div class="col-6 col-12-medium">
 								<!-- Form -->
-									<form action="/predict_form" method="POST" enctype="multipart/form-data">
-										<div id="divForm" class="row gtr-uniform">
-											<div id="inputDynamic" class="col-6 col-12">
-											</div>
-											<div class="col-6 col-12">
-												<ul class="actions">	
-													<li><input type="submit" value="Ejecutar" class="primary" /></li>
-													<li><a href="/" class="button">Volver</a></li>
-												</ul>
-											</div>
+								<form action="/predict_form" method="POST" enctype="multipart/form-data">
+									<div id="divForm" class="row gtr-uniform">
+										<div id="inputDynamic" class="col-6 col-12">
+											{% for i in columns %}
+												<input type="text" name="{{ i }}" placeholder="{{ i }}" required="required" /><br/>
+											{% endfor %}
 										</div>
-									</form>
+										<div class="col-6 col-12">
+											<ul class="actions">	
+												<li><input type="submit" value="Ejecutar" class="primary" /></li>
+												<li><a href="/" class="button">Volver</a></li>
+											</ul>
+										</div>
+									</div>
+								</form>
 								<p>{{ prediction }}</p>
 							</div>
 						</div>
@@ -84,29 +87,5 @@
 		<script src="{{url_for('static', filename = 'js/util.js')}}"></script>
 		<script src="{{url_for('static', filename = 'js/main.js')}}"></script>
 		<script src="{{url_for('static', filename = 'js/bootstrap.min.js')}}"></script>
-		<script src="{{url_for('static', filename = 'js/papaparse.js')}}"></script>
-		<script>
-			function arrayToInput(csvData) {
-				var div = $('#inputDynamic');
-				$(csvData).each(function (i, rowData) {
-					if (i == 0) {
-					$(rowData).each(function (j, cellData) {
-						console.log(rowData)
-						if(j < rowData.length-1) {
-							div.append($('<input type="text" name="'+cellData+'" placeholder="'+cellData+'" required="required" /><br/>'));
-						}
-					});
-				}
-				});
-			}
-
-			$.ajax({
-				type: "GET",
-				url: "{{url_for('static', filename='model_temp/train.csv')}}",
-				success: function (data) {
-					$('#divForm').append(arrayToInput(Papa.parse(data).data));
-				}
-			});
-		</script>
 	</body>
 </html>

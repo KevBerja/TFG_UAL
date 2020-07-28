@@ -1,8 +1,11 @@
 import sys
 import os
+import shutil
+import joblib as jb
 import traceback as tr
 import pandas as pd
-import joblib as jb
+import numpy as np
+import mysql.connector
 
 from flask import Flask, request, jsonify, render_template, redirect, session, flash
 from werkzeug.utils import secure_filename
@@ -35,21 +38,47 @@ def uploader():
 
         if (f_name != "train" and f_extension != "csv"):
             flash("ERROR - Archivo no válido. El fichero de datos de entrenamiento debe estar en formato .csv con el nombre --train.csv--")
-            
+
             return redirect('/loadInitCSV')
 
-        file_form.save(os.path.join('', file))
+        
+        os.makedirs('./static/model_temp', exist_ok=True)
+        file_form.save(os.path.join('', 'static/model_temp/' + file))
 
         flash("Archivo de datos subido con éxito")
 
         return redirect('/loadInitCSV')
 
 
-@app.route('/deleteModel', methods=['POST'])
+@app.route('/loadModel', methods=['GET'])
+def loadModel():
+    mydb = mysql.connector.connect(
+        host="localhost",
+        user="root",
+        password="",
+        database="mlaas")
+
+    mycursor = mydb.cursor()
+
+    mycursor.execute("SELECT nombre, tipo, url FROM modelos")
+
+    myresult = mycursor.fetchall()
+
+    return render_template('cargar_modelo.html', rows = myresult)
+
+
+@app.route('/deleteModel', methods=['GET'])
 def wipe():
     try:
-        os.remove('model.pkl')
-        os.remove('model_columns.pkl')
+        folder_path = './static/model_temp' 
+        
+        for file_object in os.listdir(folder_path): 
+            file_object_path = os.path.join(folder_path, file_object) 
+            
+            if os.path.isfile(file_object_path): 
+                os.unlink(file_object_path) 
+            else: 
+                shutil.rmtree(file_object_path)
         
         flash("Modelo eliminado correctamente")
         
@@ -61,78 +90,85 @@ def wipe():
         return redirect('/')
 
 
-@app.route('/train', methods=['GET'])
-def train():    
-    if not os.path.exists('model.pkl') and not os.path.exists('model_columns.pkl'):
-        if os.path.exists('train.csv'):    
-            df = pd.read_csv('train.csv', encoding='latin-1')
-            include = [str(x) for x in df.columns]  
-            dependent_variable = include[-1]
-            df_ = df[include]
+@app.route('/formTrain', methods=['GET'])
+def formTrain():
+    return render_template('train.html')
 
-            categoricals = []
+@app.route('/train', methods=['POST'])
+def train():
+    if request.method == 'POST':
+        model = list(request.form.values())
 
-            for col, col_type in df_.dtypes.items():        
-                if col_type == 'O':
-                    categoricals.append(col)
-                else:
-                    df_[col].fillna(0, inplace=True)
+        if not os.path.exists('./static/model_temp/model.pkl') and not os.path.exists('./static/model_temp/model_columns.pkl'):
+            if os.path.exists('./static/model_temp/train.csv'):   
 
-            df_ohe = pd.get_dummies(df_, columns=categoricals, dummy_na=True)
+                os.makedirs('./static/models/' + model[0], exist_ok=True)
 
-            x = df_ohe[df_ohe.columns.difference([dependent_variable])]
-            y = df_ohe[dependent_variable]
+                df = pd.read_csv('./static/model_temp/train.csv', encoding='latin-1')
+                include = [str(x) for x in df.columns]  
+                dependent_variable = include[-1]
+                df_ = df[include]
 
-            model_columns = list(x.columns)
+                categoricals = []
 
-            jb.dump(model_columns, 'model_columns.pkl')
+                for col, col_type in df_.dtypes.items():        
+                    if col_type == 'O':
+                        categoricals.append(col)
+                    else:
+                        df_[col].fillna(0, inplace=True)
 
-            clf = RandomForestClassifier()
+                df_ohe = pd.get_dummies(df_, columns=categoricals, dummy_na=True)
+
+                x = df_ohe[df_ohe.columns.difference([dependent_variable])]
+                y = df_ohe[dependent_variable]
+
+                model_columns = list(x.columns)
+                clf = RandomForestClassifier()
+                
+                # Test Data and Training Data
+                x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.33, random_state=42)
+                clf.fit(x_train, y_train)
+
+                # Accuracy model score
+                y_pred = clf.predict(x_test)
+                score = accuracy_score(y_pred, y_test)
+
+                jb.dump(clf, './static/model_temp/model.pkl')
+                jb.dump(model_columns, './static/model_temp/model_columns.pkl')
+
+                flash("Modelo entrenado correctamente")
+
+                return redirect('/formTrain')
             
-            # Test Data and Training Data
-            x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.33, random_state=42)
-            clf.fit(x_train, y_train)
+            else:
+                flash("ERROR - Se necesita primero subir el fichero de datos para entrenamiento")
+                
+                return redirect('/formTrain')
+    
+        else:
+            os.makedirs('./static/models/' + model[0], exist_ok=True)
 
-            # Accuracy model score
-            y_pred = clf.predict(x_test)
-            score = accuracy_score(y_pred, y_test)
-
-            jb.dump(clf, 'model.pkl')
+            clf = jb.load('./static/model_temp/model.pkl')
+            model_columns = jb.load('./static/model_temp/model_columns.pkl')
 
             flash("Modelo entrenado correctamente")
-
-            return redirect('/')
-        
-        else:
-            flash("ERROR - Se necesita primero subir el fichero de datos para entrenamiento")
-            
-            return redirect('/')
-    
-    else:
-        clf = jb.load('model.pkl')
-        model_columns = jb.load('model_columns.pkl')
-
-        flash("Modelo entrenado correctamente")
-            
-        return redirect('/')
+                
+            return redirect('/formTrain')
 
 
 @app.route('/predict', methods=['POST'])
 def predict():
     if request.method == 'POST':
-        clf = jb.load('model.pkl')
-        model_columns = jb.load('model_columns.pkl')
-
+        clf = jb.load('./static/model_temp/model.pkl')
+        model_columns = jb.load('./static/model_temp/model_columns.pkl')
         if clf:
             try:
                 json_ = request.json
-                query = pd.get_dummies(pd.DataFrame(json_))
+                query = pd.DataFrame(json_)
                 query = query.reindex(columns=model_columns, fill_value=0)
-                prediction = list(clf.predict(query))
-                prediction_str = [str(i) for i in prediction]
+                prediction = clf.predict(query)
 
-                return jsonify({'prediction': prediction_str}) 
-
+                return jsonify({"prediction": str(prediction)})
             except Exception as e:
 
                 return jsonify({'error': str(e), 'trace': tr.format_exc()})
@@ -142,16 +178,20 @@ def predict():
 
 @app.route('/load_predict_form', methods=['GET'])
 def load_form():
-    return render_template('formulario_predict.html')
+    df = pd.read_csv('./static/model_temp/train.csv', encoding='latin-1')
+    columns = [str(x) for x in df.columns]
+    columns.pop()
+
+    return render_template('formulario_predict.html', columns = columns)
 
 @app.route('/predict_form', methods=['POST'])
 def predict_form():
     if request.method == 'POST':
-        clf = jb.load('model.pkl')
-        model_columns = jb.load('model_columns.pkl')
-
+        clf = jb.load('./static/model_temp/model.pkl')
+        model_columns = jb.load('./static/model_temp/model_columns.pkl')
+        
         if clf:
-            try:
+            try:        
                 keys = list(request.form)
                 values = list(request.form.values())
 
@@ -166,7 +206,7 @@ def predict_form():
                     if v.find(".") != -1:
                         vx = v.split(".")
 
-                        if vx[0].isdigit() == True & vx[1].isdigit() == True:
+                        if vx[0].isdigit() == True and vx[1].isdigit() == True:
                             json_[keys[iter]] = float(v)
                             iter = iter + 1
                             continue
@@ -177,27 +217,31 @@ def predict_form():
                     else:
                         json_[keys[iter]] = v
                         iter = iter + 1
-                
+
                 query = [json_]
                 query = pd.get_dummies(pd.DataFrame(query))
                 query = query.reindex(columns=model_columns, fill_value=0)
                 prediction = clf.predict(query)
                 
-                if prediction[0] == 1:
+                df = pd.read_csv('./static/model_temp/train.csv', encoding='latin-1')
+                columns = [str(x) for x in df.columns]
+                columns.pop()
+                
+                if prediction[0] == 1:  
                     flash("Predicción realizada con éxito")
 
-                    return render_template('formulario_predict.html', prediction='Se salvará: Sí')
+                    return render_template('formulario_predict.html', prediction=prediction[0], columns=columns)
 
                 if prediction[0] == 0:
                     flash("Predicción realizada con éxito")
 
-                    return render_template('forumlario_predict.html', prediction='Se salvará: No')                
+                    return render_template('formulario_predict.html', prediction=prediction[0], columns=columns))                
 
             except Exception as e:
-
                 flash("ERROR - La predicción falló. Por favor, revise los datos introducidos")
 
                 return redirect('/load_predict_form')
+
         else:
             flash("ERROR - Debe entrenar primero un modelo")
 
@@ -223,7 +267,7 @@ def predictMassive():
 
         file_form.save(os.path.join('', file))
         
-        df = pd.read_csv(file)
+        df = pd.read_csv(file, encoding='latin-1')
         include = [str(x) for x in df.columns]  
         df_ = df[include]
 
@@ -258,6 +302,8 @@ def predictMassive():
             flash("ERROR - Es necesario entrenar primero el modelo")
             
             return redirect('/loadCSVToPredict')
+
+
 
 if __name__ == '__main__':
     app.run(debug=False, port=5002, host="0.0.0.0")

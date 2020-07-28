@@ -22,7 +22,7 @@
 					{% endfor %}
 				{% endif %}
 			{% endwith %}
-			</div>
+		</div>
 
 		<!-- Highlights -->
 		<section class="wrapper">
@@ -31,7 +31,6 @@
 					<h1>Random Forest</h1>
 					<p>Modelo de aprendizaje supervisado</p>
 				</header>
-				
 				<div class="highlights">
 					<section>
 						<div class="content">
@@ -45,7 +44,7 @@
 					<section>
 						<div class="content">
 							<header>
-								<a href="" class="icon-cogs"><span class="label"><img src="{{url_for('static', filename = 'icons8-caja-100.png')}}" /></span></a>
+								<a href="/loadModel" class="icon-cogs"><span class="label"><img src="{{url_for('static', filename = 'icons8-caja-100.png')}}" /></span></a>
 								<h3>Cargar un modelo existente</h3>
 							</header>
 							<p>Carga un modelo previamente entrenado para realizar predicciones</p>
@@ -54,7 +53,7 @@
 					<section>
 						<div class="content">
 							<header>
-								<a href="/train" class="icon-cogs"><span class="label"><img src="{{url_for('static', filename = 'icons8-peptido-100.png')}}" /></span></a>
+								<a href="/formTrain" class="icon-cogs"><span class="label"><img src="{{url_for('static', filename = 'icons8-peptido-100.png')}}" /></span></a>
 								<h3>Entrenar modelo</h3>
 							</header>
 							<p>Entrena el conjunto de datos actual</p>

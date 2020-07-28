@@ -27,12 +27,12 @@
 		<section class="wrapper">
 			<div class="inner">
 				<header class="special">
-					<h1>Regresión Logística</h1>
+					<h1>Logistic Regression</h1>
 					<p>Modelo de aprendizaje supervisado</p>
 				</header>
 			</div>
 
-		<!-- Main -->
+			<!-- Main -->
 			<section id="main">
 				<div class="inner">
 					<div class="content">
@@ -46,21 +46,21 @@
 							</div>
 							<div class="col-6 col-12-medium">
 								<!-- Form -->
-									<form action="/predict_form" method="POST" enctype="multipart/form-data">
-										<div id="divForm" class="row gtr-uniform">
-											<div id="inputDynamic" class="col-6 col-12">
-												{% for i in columns %}
-													<input type="text" name="{{ i }}" placeholder="{{ i }}" required="required" /><br/>
-												{% endfor %}
-											</div>
-											<div class="col-6 col-12">
-												<ul class="actions">	
-													<li><input type="submit" value="Ejecutar" class="primary" /></li>
-													<li><a href="/" class="button">Volver</a></li>
-												</ul>
-											</div>
+								<form action="/predict_form" method="POST" enctype="multipart/form-data">
+									<div id="divForm" class="row gtr-uniform">
+										<div id="inputDynamic" class="col-6 col-12">
+											{% for i in columns %}
+												<input type="text" name="{{ i }}" placeholder="{{ i }}" required="required" /><br/>
+											{% endfor %}
 										</div>
-									</form>
+										<div class="col-6 col-12">
+											<ul class="actions">	
+												<li><input type="submit" value="Ejecutar" class="primary" /></li>
+												<li><a href="/" class="button">Volver</a></li>
+											</ul>
+										</div>
+									</div>
+								</form>
 								<p>{{ prediction }}</p>
 							</div>
 						</div>

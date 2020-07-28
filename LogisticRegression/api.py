@@ -37,13 +37,12 @@ def uploader():
         f_extension = filename[-1]
 
         if (f_name != "train" and f_extension != "csv"):
-
             flash("ERROR - Archivo no válido. El fichero de datos de entrenamiento debe estar en formato .csv con el nombre --train.csv--")
 
             return redirect('/loadInitCSV')
 
+        
         os.makedirs('./static/model_temp', exist_ok=True)
-
         file_form.save(os.path.join('', 'static/model_temp/' + file))
 
         flash("Archivo de datos subido con éxito")
@@ -71,7 +70,6 @@ def loadModel():
 @app.route('/deleteModel', methods=['GET'])
 def wipe():
     try:
-
         folder_path = './static/model_temp' 
         
         for file_object in os.listdir(folder_path): 
@@ -125,9 +123,6 @@ def train():
                 y = df_ohe[dependent_variable]
 
                 model_columns = list(x.columns)
-
-                jb.dump(model_columns, './static/model_temp/model_columns.pkl')
-
                 clf = LogisticRegression(max_iter=1000)
                 
                 # Test Data and Training Data
@@ -139,6 +134,7 @@ def train():
                 score = accuracy_score(y_pred, y_test)
 
                 jb.dump(clf, './static/model_temp/model.pkl')
+                jb.dump(model_columns, './static/model_temp/model_columns.pkl')
 
                 flash("Modelo entrenado correctamente")
 
@@ -186,7 +182,7 @@ def load_form():
     columns = [str(x) for x in df.columns]
     columns.pop()
 
-    return render_template('formulario_predict.html', columns = columns)
+    return render_template('formulario_predict.html', columns=columns)
 
 @app.route('/predict_form', methods=['POST'])
 def predict_form():
@@ -226,22 +222,26 @@ def predict_form():
                 query = pd.get_dummies(pd.DataFrame(query))
                 query = query.reindex(columns=model_columns, fill_value=0)
                 prediction = clf.predict(query)
+
+                df = pd.read_csv('./static/model_temp/train.csv', encoding='latin-1')
+                columns = [str(x) for x in df.columns]
+                columns.pop()
                 
                 if prediction[0] == 1:  
                     flash("Predicción realizada con éxito")
 
-                    return render_template('formulario_predict.html', prediction=prediction[0])
+                    return render_template('formulario_predict.html', prediction=prediction[0], columns=columns)
 
                 if prediction[0] == 0:
                     flash("Predicción realizada con éxito")
 
-                    return render_template('formulario_predict.html', prediction=prediction[0])                
+                    return render_template('formulario_predict.html', prediction=prediction[0], columns=columns)                
 
             except Exception as e:
-
                 flash("ERROR - La predicción falló. Por favor, revise los datos introducidos")
 
                 return redirect('/load_predict_form')
+
         else:
             flash("ERROR - Debe entrenar primero un modelo")
 
@@ -302,6 +302,8 @@ def predictMassive():
             flash("ERROR - Es necesario entrenar primero el modelo")
             
             return redirect('/loadCSVToPredict')
+
+
 
 if __name__ == '__main__':
     app.run(debug=False, port=5001, host="0.0.0.0")

@@ -1,7 +1,7 @@
 <!DOCTYPE HTML>
 <html>
 	<head>
-		<title>Nuevo modelo de datos</title>
+		<title>Entrenar modelo</title>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
 		<meta name="description" content="" />
@@ -40,28 +40,30 @@
 					<!-- Elements -->
 					<div class="row">
 						<div class="col-6 col-12-medium">
-							<h3>Subida de datos</h3>
+							<h3>Entrenamiento</h3>
 							<br/>
-							<p>Selección del fichero de datos en formato .csv del equipo para entrenar nuestro modelo predictivo.</p>
+							<p>Define un nombre para el modelo y entrénalo para futuras predicciones.</p>
 						</div>
+
 						<div class="col-6 col-12-medium">
+							<h5>Definir un nombre para el modelo...</h5>
 							<!-- Form -->
-							<h5>Adjuntar fichero para entrenamiento...</h5>
-								<form action="/uploadInitCSV" method="POST" enctype="multipart/form-data">
-									<div class="row gtr-uniform">
+							<form action="/train" method="POST" enctype="multipart/form-data">
+								<div class="row gtr-uniform">
 										<div class="col-6 col-12">
 											<br/>
-											<input type="file" name="file_request" class="primary" />
+											<input type="text" name="nombre_modelo" placeholder="Nombre del modelo" required="required" />
 										</div>
+										<!-- Break -->
 										<div class="col-6 col-12">
 											<ul class="actions">	
-												<li><input type="submit" value="Subir archivo" class="primary" /></li>
+												<li><input type="submit" value="Entrenar" class="primary" /></li>
 												<li><a href="/" class="button">Volver</a></li>
 											</ul>
 										</div>
 									</div>
-								</form>
-							</div>
+								</div>
+							</form>
 						</div>
 					</div>
 				</div>

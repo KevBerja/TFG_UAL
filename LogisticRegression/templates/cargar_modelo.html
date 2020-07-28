@@ -28,7 +28,7 @@
 		<section class="wrapper">
 			<div class="inner">
 				<header class="special">
-					<h1>Regresión Logística</h1>
+					<h1>Logistic Regression</h1>
 					<p>Modelo de aprendizaje supervisado</p>
 				</header>
 			</div>
@@ -48,12 +48,14 @@
 								</thead>
                                 <tbody>
 									{% for i in rows %}
-									<tr>
-										{% for row in i %}
-											<td>{{ row }}</td>
-										{% endfor %}
-										<td><input type="submit" value="Cargar" class="primary" /></td>
-									</tr>
+										<form action="" method="POST" enctype="multipart/form-data">
+											<tr>
+												{% for row in i %}
+													<td>{{ row }}</td>
+												{% endfor %}
+												<td><input type="submit" value="Cargar modelo" class="primary" /></td>
+											</tr>
+										</form>
 									{% endfor %}
                                 </tbody>
                             </table>
