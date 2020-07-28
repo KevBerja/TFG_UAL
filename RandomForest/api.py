@@ -64,7 +64,7 @@ def loadModel():
 
     myresult = mycursor.fetchall()
 
-    return render_template('cargar_modelo.html', rows = myresult)
+    return render_template('cargar_modelo.html', rows=myresult)
 
 
 @app.route('/deleteModel', methods=['GET'])
@@ -182,7 +182,7 @@ def load_form():
     columns = [str(x) for x in df.columns]
     columns.pop()
 
-    return render_template('formulario_predict.html', columns = columns)
+    return render_template('formulario_predict.html', columns=columns)
 
 @app.route('/predict_form', methods=['POST'])
 def predict_form():

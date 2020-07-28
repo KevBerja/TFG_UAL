@@ -64,7 +64,7 @@ def loadModel():
 
     myresult = mycursor.fetchall()
 
-    return render_template('cargar_modelo.html', rows = myresult)
+    return render_template('cargar_modelo.html', rows=myresult)
 
 
 @app.route('/deleteModel', methods=['GET'])
