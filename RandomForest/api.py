@@ -52,19 +52,58 @@ def uploader():
 
 @app.route('/loadModel', methods=['GET'])
 def loadModel():
-    mydb = mysql.connector.connect(
-        host="localhost",
-        user="root",
-        password="",
-        database="mlaas")
+    try:
+        mydb = mysql.connector.connect(
+            host="localhost",
+            user="root",
+            password="",
+            database="mlaas")
 
-    mycursor = mydb.cursor()
+        mycursor = mydb.cursor()
 
-    mycursor.execute("SELECT nombre, tipo, url FROM modelos")
+        mycursor.execute("SELECT nombre, tipo, url FROM modelos")
 
-    myresult = mycursor.fetchall()
+        myresult = mycursor.fetchall()
 
-    return render_template('cargar_modelo.html', rows=myresult)
+        return render_template('cargar_modelo.html', rows=myresult)
+    
+    except Exception as e:
+        flash("ERROR - No se han podido obtener la lista de modelos de la base de datos")
+
+        return render_template('cargar_modelo.html')
+
+
+@app.route('/setModel', methods=['POST'])
+def setModel():
+    if request.method == 'POST':
+        json_values = list(request.form.values())
+        model_url = json_values[-1]
+        model_name = json_values[0]
+        
+        try:
+            shutil.copy('./static/models/' + model_name + '/train.csv', './static/model_temp/train.csv')
+            shutil.copy('./static/models/' + model_name + '/model.pkl', './static/model_temp/model.pkl')
+            shutil.copy('./static/models/' + model_name + '/model_columns.pkl', './static/model_temp/model_columns.pkl') 
+
+            flash("Modelo " + model_name + " descargado correctamente")
+
+            return redirect('/loadModel')
+
+        except Exception as e:
+            folder_path = './static/model_temp' 
+            
+            for file_object in os.listdir(folder_path): 
+                file_object_path = os.path.join(folder_path, file_object) 
+                        
+                if os.path.isfile(file_object_path): 
+                    os.unlink(file_object_path) 
+                else: 
+                    shutil.rmtree(file_object_path)
+
+            flash("ERROR - No se ha podido descargar el modelo: " + model_name)
+
+            return redirect('/loadModel')
+
 
 
 @app.route('/deleteModel', methods=['GET'])
@@ -98,62 +137,112 @@ def formTrain():
 def train():
     if request.method == 'POST':
         model = list(request.form.values())
+        model_name = model[0]
 
-        if not os.path.exists('./static/model_temp/model.pkl') and not os.path.exists('./static/model_temp/model_columns.pkl'):
-            if os.path.exists('./static/model_temp/train.csv'):   
-
-                os.makedirs('./static/models/' + model[0], exist_ok=True)
-
-                df = pd.read_csv('./static/model_temp/train.csv', encoding='latin-1')
-                include = [str(x) for x in df.columns]  
-                dependent_variable = include[-1]
-                df_ = df[include]
-
-                categoricals = []
-
-                for col, col_type in df_.dtypes.items():        
-                    if col_type == 'O':
-                        categoricals.append(col)
-                    else:
-                        df_[col].fillna(0, inplace=True)
-
-                df_ohe = pd.get_dummies(df_, columns=categoricals, dummy_na=True)
-
-                x = df_ohe[df_ohe.columns.difference([dependent_variable])]
-                y = df_ohe[dependent_variable]
-
-                model_columns = list(x.columns)
-                clf = RandomForestClassifier()
+        if os.path.exists('./static/model_temp/train.csv'):
+            if os.path.exists('./static/models/' + model_name):
+                flash("Existe un modelo con el nombre '" + model_name + "'. Por favor, utilice otro nombre")
+                  
+                return redirect('/formTrain')
                 
-                # Test Data and Training Data
-                x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.33, random_state=42)
-                clf.fit(x_train, y_train)
+            else:   
+                os.makedirs('./static/models/' + model_name, exist_ok=True)
 
-                # Accuracy model score
-                y_pred = clf.predict(x_test)
-                score = accuracy_score(y_pred, y_test)
+            df = pd.read_csv('./static/model_temp/train.csv', encoding='latin-1')
+            include = [str(x) for x in df.columns]  
+            dependent_variable = include[-1]
+            df_ = df[include]
 
+            categoricals = []
+
+            for col, col_type in df_.dtypes.items():        
+                if col_type == 'O':
+                    categoricals.append(col)
+                else:
+                    df_[col].fillna(0, inplace=True)
+
+            df_ohe = pd.get_dummies(df_, columns=categoricals, dummy_na=True)
+
+            x = df_ohe[df_ohe.columns.difference([dependent_variable])]
+            y = df_ohe[dependent_variable]
+
+            model_columns = list(x.columns)
+            clf = RandomForestClassifier()
+                
+            # Test Data and Training Data
+            x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.33, random_state=42)
+            clf.fit(x_train, y_train)
+
+            # Accuracy model score
+            y_pred = clf.predict(x_test)
+            score = accuracy_score(y_pred, y_test)
+
+            try:
                 jb.dump(clf, './static/model_temp/model.pkl')
                 jb.dump(model_columns, './static/model_temp/model_columns.pkl')
 
                 flash("Modelo entrenado correctamente")
-
-                return redirect('/formTrain')
-            
-            else:
-                flash("ERROR - Se necesita primero subir el fichero de datos para entrenamiento")
                 
+            except Exception as e:
+                folder_path = './static/model_temp' 
+        
+                for file_object in os.listdir(folder_path): 
+                    file_object_path = os.path.join(folder_path, file_object) 
+                    
+                    if os.path.isfile(file_object_path): 
+                        os.unlink(file_object_path) 
+                    else: 
+                        shutil.rmtree(file_object_path)
+
+                flash("ERROR - Ha ocurrido un problema durante el entrenamiento")
+                        
                 return redirect('/formTrain')
-    
+
+            try:
+                shutil.copy('./static/model_temp/train.csv', './static/models/' + model_name + '/train.csv')
+                shutil.copy('./static/model_temp/model.pkl', './static/models/' + model_name + '/model.pkl')
+                shutil.copy('./static/model_temp/model_columns.pkl', './static/models/' + model_name + '/model_columns.pkl')
+
+                try:
+                    mydb = mysql.connector.connect(
+                        host="localhost",
+                        user="root",
+                        password="",
+                        database="mlaas")
+
+                    mycursor = mydb.cursor()
+
+                    sql = "INSERT INTO modelos (tipo, nombre, url) VALUES (%s, %s, %s)"
+                    val = ("Random Forest", model_name, './static/models/' + model_name)
+                    
+                    mycursor.execute(sql, val)
+
+                    mydb.commit()
+
+                    flash("Modelo '" + model_name + "' guardado en la base de datos correctamente")
+                                
+                    return redirect('/formTrain')
+                        
+                except Exception as ex:
+                    shutil.rmtree('./static/models/' + model_name)
+
+                    flash("ERROR - No se ha podido guardar el modelo: " + model_name +". Por favor, vuelva de nuevo más tarde")
+
+                    return redirect('/formTrain')
+
+                
+            except Exception as exc:
+                shutil.rmtree('./static/models/' + model_name)
+
+                flash("ERROR - No se ha podido guardar el modelo: " + model_name +". Por favor, vuelva de nuevo más tarde")
+                        
+                return redirect('/formTrain')
+
         else:
-            os.makedirs('./static/models/' + model[0], exist_ok=True)
+            flash("Es necesario subir un modelo de datos")
 
-            clf = jb.load('./static/model_temp/model.pkl')
-            model_columns = jb.load('./static/model_temp/model_columns.pkl')
-
-            flash("Modelo entrenado correctamente")
-                
             return redirect('/formTrain')
+
 
 
 @app.route('/predict', methods=['POST'])
@@ -178,11 +267,18 @@ def predict():
 
 @app.route('/load_predict_form', methods=['GET'])
 def load_form():
-    df = pd.read_csv('./static/model_temp/train.csv', encoding='latin-1')
-    columns = [str(x) for x in df.columns]
-    columns.pop()
+    try:
+        df = pd.read_csv('./static/model_temp/train.csv', encoding='latin-1')
+        columns = [str(x) for x in df.columns]
+        columns.pop()
 
-    return render_template('formulario_predict.html', columns=columns)
+        return render_template('formulario_predict.html', columns=columns)
+    
+    except Exception as e:
+        flash("Es necesario subir y entrenar un modelo o cargar un modelo existente")
+
+        return redirect('/')
+    
 
 @app.route('/predict_form', methods=['POST'])
 def predict_form():
@@ -222,7 +318,7 @@ def predict_form():
                 query = pd.get_dummies(pd.DataFrame(query))
                 query = query.reindex(columns=model_columns, fill_value=0)
                 prediction = clf.predict(query)
-                
+
                 df = pd.read_csv('./static/model_temp/train.csv', encoding='latin-1')
                 columns = [str(x) for x in df.columns]
                 columns.pop()
@@ -235,7 +331,7 @@ def predict_form():
                 if prediction[0] == 0:
                     flash("Predicción realizada con éxito")
 
-                    return render_template('formulario_predict.html', prediction=prediction[0], columns=columns))                
+                    return render_template('formulario_predict.html', prediction=prediction[0], columns=columns)                
 
             except Exception as e:
                 flash("ERROR - La predicción falló. Por favor, revise los datos introducidos")
@@ -248,9 +344,21 @@ def predict_form():
             return redirect('/load_predict_form')
 
 
+
 @app.route('/loadCSVToPredict', methods=['GET'])
 def uploadMassive():
-    return render_template('prediccion_masiva.html')
+    try:
+        df = pd.read_csv('./static/model_temp/train.csv', encoding='latin-1')
+        columns = [str(x) for x in df.columns]
+        columns.pop()
+
+        return render_template('prediccion_masiva.html')
+    
+    except Exception as e:
+        flash("Es necesario subir y entrenar un modelo o cargar un modelo existente")
+
+        return redirect('/')
+
 
 @app.route('/predictMassive', methods=['POST'])
 def predictMassive():

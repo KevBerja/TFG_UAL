@@ -37,27 +37,27 @@
 				<div class="inner">
 					<div class="content">
                         <div class="table-wrapper">
-								<form action="" method="POST" enctype="multipart/form-data">
-                            <table>
-                                <thead>
-                                    <tr>
+							<table>
+								<thead>
+									<tr>
 										<th>Modelo</th>
 										<th>Tipo</th>
-                                        <th>URL</th>
-                                    </tr>
+										<th>URL</th>
+									</tr>
 								</thead>
-                                <tbody>
-									{% for i in rows %}		
+								<tbody>
+									{% for i in rows %}
+										<form action="/setModel" method="POST" enctype="multipart/form-data">		
 											<tr>
 												{% for row in i %}
 													<td><input type="text" name ="{{ row }}" value="{{ row }}" style="border: 0; background-color: transparent;" readonly /></td>
 												{% endfor %}
 												<td><input type="submit" value="Cargar modelo" class="primary" /></td>
-											</tr>	
+											</tr>
+										</form>	
 									{% endfor %}
-                                </tbody>
+								</tbody>
 							</table>
-						</form>
                         </div>
                     </div>
 				</div>
