@@ -61,7 +61,7 @@ def loadModel():
 
         mycursor = mydb.cursor()
 
-        mycursor.execute("SELECT nombre, tipo, url FROM modelos")
+        mycursor.execute("SELECT nombre, tipo, url FROM modelos WHERE tipo = 'Logistic Regression'")
 
         myresult = mycursor.fetchall()
 
@@ -77,7 +77,6 @@ def loadModel():
 def setModel():
     if request.method == 'POST':
         json_values = list(request.form.values())
-        model_url = json_values[-1]
         model_name = json_values[0]
         
         try:
@@ -389,8 +388,7 @@ def predictMassive():
 
         query = pd.get_dummies(df_, columns=categoricals, dummy_na=True)
 
-        clf = jb.load('model.pkl')
-        model_columns = jb.load('model_columns.pkl')
+        clf = jb.load('./static/model_temp/model.pkl')
 
         os.remove(file)
 
