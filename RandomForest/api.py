@@ -105,7 +105,7 @@ def setModel():
 
 
 
-@app.route('/deleteModel', methods=['GET'])
+@app.route('/deleteModel', methods=['GET', 'DELETE'])
 def wipe():
     try:
         folder_path = './static/model_temp' 

@@ -48,7 +48,7 @@ def uploader():
         return redirect('/loadInitCSV')
 
 
-@app.route('/deleteModel', methods=['GET'])
+@app.route('/deleteModel', methods=['GET', 'DELETE'])
 def wipe():
     try:
         os.remove('model.pkl')
