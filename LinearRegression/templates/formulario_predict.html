@@ -15,7 +15,7 @@
 				{% if messages %}
 					{% for message in messages %}
 						<div class="alert alert-warning alert-dismissible" role="alert">
-							<button type="button" class="close" data-dismiss="alert" style ="box-shadow:none;" aria-label="Cerrar"><span aria-hidden="true">&times;</span></button>
+							<button type="button" class="close" data-dismiss="alert" style="box-shadow:none;" aria-label="Cerrar"><span aria-hidden="true">&times;</span></button>
 							{{ message }}
 						</div>
 					{% endfor %}
@@ -27,12 +27,12 @@
 		<section class="wrapper">
 			<div class="inner">
 				<header class="special">
-					<h1>Regresión Lineal</h1>
+					<h1>Linear Regression</h1>
 					<p>Modelo de aprendizaje supervisado</p>
 				</header>
 			</div>
 
-		<!-- Main -->
+			<!-- Main -->
 			<section id="main">
 				<div class="inner">
 					<div class="content">
@@ -40,24 +40,27 @@
 					<!-- Elements -->
 						<div class="row">
 							<div class="col-6 col-12-medium">
-									<h3>Predicción Simple</h3>
-									<br/>
-									<p>Realiza una predicción simple con el siguiente formulario.</p>
+								<h3>Predicción Simple</h3>
+								<br/>
+								<p>Realiza una predicción simple con el siguiente formulario.</p>
 							</div>
 							<div class="col-6 col-12-medium">
 								<!-- Form -->
-									<form action="/predict_form" method="POST" enctype="multipart/form-data">
-										<div id="divForm" class="row gtr-uniform">
-											<div id="inputDynamic" class="col-6 col-12">
-											</div>
-											<div class="col-6 col-12">
-												<ul class="actions">	
-													<li><input type="submit" value="Ejecutar" class="primary" /></li>
-													<li><a href="/" class="button">Volver</a></li>
-												</ul>
-											</div>
+								<form action="/predict_form" method="POST" enctype="multipart/form-data">
+									<div id="divForm" class="row gtr-uniform">
+										<div id="inputDynamic" class="col-6 col-12">
+											{% for i in columns %}
+												<input type="text" name="{{ i }}" placeholder="{{ i }}" required="required" /><br/>
+											{% endfor %}
 										</div>
-									</form>
+										<div class="col-6 col-12">
+											<ul class="actions">	
+												<li><input type="submit" value="Ejecutar" class="primary" /></li>
+												<li><a href="/" class="button">Volver</a></li>
+											</ul>
+										</div>
+									</div>
+								</form>
 								<p>{{ prediction }}</p>
 							</div>
 						</div>
@@ -84,29 +87,5 @@
 		<script src="{{url_for('static', filename = 'js/util.js')}}"></script>
 		<script src="{{url_for('static', filename = 'js/main.js')}}"></script>
 		<script src="{{url_for('static', filename = 'js/bootstrap.min.js')}}"></script>
-		<script src="{{url_for('static', filename = 'js/papaparse.js')}}"></script>
-		<script>
-			function arrayToInput(csvData) {
-				var div = $('#inputDynamic');
-				$(csvData).each(function (i, rowData) {
-					if (i == 0) {
-					$(rowData).each(function (j, cellData) {
-						console.log(rowData)
-						if(j < rowData.length-1) {
-							div.append($('<input type="text" name="'+cellData+'" placeholder="'+cellData+'" required="required" /><br/>'));
-						}
-					});
-				}
-				});
-			}
-
-			$.ajax({
-				type: "GET",
-				url: "{{url_for('static', filename='model_temp/train.csv')}}",
-				success: function (data) {
-					$('#divForm').append(arrayToInput(Papa.parse(data).data));
-				}
-			});
-		</script>
 	</body>
 </html>

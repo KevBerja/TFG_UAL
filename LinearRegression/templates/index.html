@@ -12,26 +12,25 @@
 	</head>
 	<body class="is-preload">
 		<div class="container-fluid" style="min-height:100%; width:80%;">
-		{% with messages = get_flashed_messages() %}
-			{% if messages %}
-				{% for message in messages %}
-					<div class="alert alert-warning alert-dismissible" role="alert">
-						<button type="button" class="close" data-dismiss="alert" style="box-shadow:none;" aria-label="Cerrar"><span aria-hidden="true">&times;</span></button>
-						{{ message }}
-					</div>
-				{% endfor %}
-			{% endif %}
-		{% endwith %}
+			{% with messages = get_flashed_messages() %}
+				{% if messages %}
+					{% for message in messages %}
+						<div class="alert alert-warning alert-dismissible" role="alert">
+							<button type="button" class="close" data-dismiss="alert" style="box-shadow:none;" aria-label="Cerrar"><span aria-hidden="true">&times;</span></button>
+							{{ message }}
+						</div>
+					{% endfor %}
+				{% endif %}
+			{% endwith %}
 		</div>
 
 		<!-- Highlights -->
 		<section class="wrapper">
 			<div class="inner">
 				<header class="special">
-					<h1>Regresión Lineal</h1>
+					<h1>Logistic Regression</h1>
 					<p>Modelo de aprendizaje supervisado</p>
 				</header>
-				
 				<div class="highlights">
 					<section>
 						<div class="content">
@@ -45,7 +44,7 @@
 					<section>
 						<div class="content">
 							<header>
-								<a href="" class="icon-cogs"><span class="label"><img src="{{url_for('static', filename = 'images/icons8-caja-100.png')}}" /></span></a>
+								<a href="/loadModel" class="icon-cogs"><span class="label"><img src="{{url_for('static', filename = 'images/icons8-caja-100.png')}}" /></span></a>
 								<h3>Cargar un modelo existente</h3>
 							</header>
 							<p>Carga un modelo previamente entrenado para realizar predicciones</p>
@@ -54,7 +53,7 @@
 					<section>
 						<div class="content">
 							<header>
-								<a href="/train" class="icon-cogs"><span class="label"><img src="{{url_for('static', filename = 'images/icons8-peptido-100.png')}}" /></span></a>
+								<a href="/formTrain" class="icon-cogs"><span class="label"><img src="{{url_for('static', filename = 'images/icons8-peptido-100.png')}}" /></span></a>
 								<h3>Entrenar modelo</h3>
 							</header>
 							<p>Entrena el conjunto de datos actual</p>
@@ -84,7 +83,7 @@
 								<a href="/deleteModel" class="icon-cogs"><span class="label"><img src="{{url_for('static', filename = 'images/icons8-actualizar-100.png')}}" /></span></a>
 								<h3>Inicializar</h3>
 							</header>
-							<p>Limpia el modelo actual descargado</p>>
+							<p>Limpia el modelo actual descargado</p>
 						</div>
 					</section>
 				</div>

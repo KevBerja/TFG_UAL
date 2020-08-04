@@ -1,0 +1,86 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<title>Cargar modelo</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<meta name="description" content="" />
+		<meta name="keywords" content="" />
+		<link rel="stylesheet" href="{{url_for('static', filename = 'css/main.css')}}" />
+		<link rel="stylesheet" href="{{url_for('static', filename = 'css/bootstrap.min.css')}}" />
+	</head>
+	<body class="is-preload">
+		<div class="container-fluid" style="min-height:100%; width:80%;">
+			{% with messages = get_flashed_messages() %}
+				{% if messages %}
+					{% for message in messages %}
+						<div class="alert alert-warning alert-dismissible" role="alert">
+							<button type="button" class="close" data-dismiss="alert" style="box-shadow:none;" aria-label="Cerrar"><span aria-hidden="true">&times;</span></button>
+							{{ message }}
+						</div>
+					{% endfor %}
+				{% endif %}
+			{% endwith %}
+		</div>
+
+		<!-- Highlights -->
+		<section class="wrapper">
+			<div class="inner">
+				<header class="special">
+					<h1>Linear Regression</h1>
+					<p>Modelo de aprendizaje supervisado</p>
+				</header>
+			</div>
+
+		<!-- Main -->
+			<section id="main">
+				<div class="inner">
+					<div class="content">
+                        <div class="table-wrapper">
+							<table>
+								<thead>
+									<tr>
+										<th>Modelo</th>
+										<th>Tipo</th>
+										<th>URL</th>
+									</tr>
+								</thead>
+								<tbody>
+									{% for i in rows %}
+										<form action="/setModel" method="POST" enctype="multipart/form-data">		
+											<tr>
+												{% for row in i %}
+													<td><input type="text" name ="{{ row }}" value="{{ row }}" style="border: 0; background-color: transparent;" readonly /></td>
+												{% endfor %}
+												<td><input type="submit" value="Cargar modelo" class="primary" /></td>
+											</tr>
+										</form>	
+									{% endfor %}
+								</tbody>
+							</table>
+                        </div>
+                    </div>
+				</div>
+			</section>
+		</section>
+
+		<!-- Footer -->
+		<footer id="footer">
+			<div class="inner">
+				<h6>MLaaS - Machine Learning as a Service</h6>
+				<p>Trabajo Fin de Grado</p>
+				<div class="copyright">
+					<p>&copy; Kevin Carracedo Vázquez. Grado en Ingeniería Informática. Universidad de Almería.</p>
+				</div>
+			</div>
+		</footer>
+
+		<!-- Scripts -->
+		<script src="{{url_for('static', filename = 'js/jquery.min.js')}}"></script>
+		<script src="{{url_for('static', filename = 'js/browser.js')}}"></script>
+		<script src="{{url_for('static', filename = 'js/breakpoints.min.js')}}"></script>
+		<script src="{{url_for('static', filename = 'js/util.js')}}"></script>
+		<script src="{{url_for('static', filename = 'js/main.js')}}"></script>
+		<script src="{{url_for('static', filename = 'js/bootstrap.min.js')}}"></script>
+	</body>
+</html>

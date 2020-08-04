@@ -1,9 +1,11 @@
 import sys
 import os
+import shutil
 import traceback as tr
 import numpy as np
 import pandas as pd
 import joblib as jb
+import mysql.connector
 
 from flask import Flask, request, jsonify, render_template, redirect, session, flash
 from werkzeug.utils import secure_filename
@@ -36,23 +38,86 @@ def uploader():
         f_extension = filename[-1]
 
         if (f_name != "train" and f_extension != "csv"):
-
             flash("ERROR - Archivo no válido. El fichero de datos de entrenamiento debe estar en formato .csv con el nombre --train.csv--")
-            
+
             return redirect('/loadInitCSV')
 
-        file_form.save(os.path.join('', file))
+        
+        os.makedirs('./static/model_temp', exist_ok=True)
+        file_form.save(os.path.join('', 'static/model_temp/' + file))
 
         flash("Archivo de datos subido con éxito")
 
         return redirect('/loadInitCSV')
 
 
+@app.route('/loadModel', methods=['GET'])
+def loadModel():
+    try:
+        mydb = mysql.connector.connect(
+            host="localhost",
+            user="root",
+            password="",
+            database="mlaas")
+
+        mycursor = mydb.cursor()
+
+        mycursor.execute("SELECT nombre, tipo, url FROM modelos WHERE tipo = 'Linear Regression'")
+
+        myresult = mycursor.fetchall()
+
+        return render_template('cargar_modelo.html', rows=myresult)
+    
+    except Exception as e:
+        flash("ERROR - No se han podido obtener la lista de modelos de la base de datos")
+
+        return render_template('cargar_modelo.html')
+
+
+@app.route('/setModel', methods=['POST'])
+def setModel():
+    if request.method == 'POST':
+        json_values = list(request.form.values())
+        model_name = json_values[0]
+        
+        try:
+            shutil.copy('./static/models/' + model_name + '/train.csv', './static/model_temp/train.csv')
+            shutil.copy('./static/models/' + model_name + '/model.pkl', './static/model_temp/model.pkl')
+            shutil.copy('./static/models/' + model_name + '/model_columns.pkl', './static/model_temp/model_columns.pkl') 
+
+            flash("Modelo " + model_name + " descargado correctamente")
+
+            return redirect('/loadModel')
+
+        except Exception as e:
+            folder_path = './static/model_temp' 
+            
+            for file_object in os.listdir(folder_path): 
+                file_object_path = os.path.join(folder_path, file_object) 
+                        
+                if os.path.isfile(file_object_path): 
+                    os.unlink(file_object_path) 
+                else: 
+                    shutil.rmtree(file_object_path)
+
+            flash("ERROR - No se ha podido descargar el modelo: " + model_name)
+
+            return redirect('/loadModel')
+
+
+
 @app.route('/deleteModel', methods=['GET', 'DELETE'])
 def wipe():
     try:
-        os.remove('model.pkl')
-        os.remove('model_columns.pkl')
+        folder_path = './static/model_temp' 
+        
+        for file_object in os.listdir(folder_path): 
+            file_object_path = os.path.join(folder_path, file_object) 
+            
+            if os.path.isfile(file_object_path): 
+                os.unlink(file_object_path) 
+            else: 
+                shutil.rmtree(file_object_path)
         
         flash("Modelo eliminado correctamente")
         
@@ -64,51 +129,115 @@ def wipe():
         return redirect('/')
 
 
-@app.route('/train', methods=['GET'])
-def train():    
-    if not os.path.exists('model.pkl') and not os.path.exists('model_columns.pkl'):
-        if os.path.exists('train.csv'):    
-            dataset = pd.read_csv('train.csv')
-            dataset['experience'].fillna(0, inplace=True)
-            dataset['test_score'].fillna(dataset['test_score'].mean(), inplace=True)
+@app.route('/formTrain', methods=['GET'])
+def formTrain():
+    return render_template('train.html')
 
-            x = dataset.iloc[:, :3]
-            print(x)
-            y = dataset.iloc[:, -1]
-            print(y)
+
+@app.route('/train', methods=['POST'])
+def train():
+    if request.method == 'POST':
+        model = list(request.form.values())
+        model_name = model[0]
+
+        if os.path.exists('./static/model_temp/train.csv'):
+            if os.path.exists('./static/models/' + model_name):
+                flash("Existe un modelo con el nombre '" + model_name + "'. Por favor, utilice otro nombre")
+                  
+                return redirect('/formTrain')
+                
+            else:   
+                os.makedirs('./static/models/' + model_name, exist_ok=True)
+
+  
+            dataset = pd.read_csv('./static/model_temp/train.csv', encoding='latin-1')
+            include = [str(x) for x in dataset.columns]
+
+            df_ = dataset[include]
+
+            for col, col_type in df_.dtypes.items():        
+                df_[col].fillna(0, inplace=True)
+
+            x = df_.iloc[:, :len(include)-1]
+            y = df_.iloc[:, -1]
 
             model_columns = list(x.columns)
-            jb.dump(model_columns, 'model_columns.pkl')
 
             clf = LinearRegression()
             clf.fit(x, y)
 
-            jb.dump(clf, 'model.pkl')
+            try:
+                jb.dump(clf, './static/model_temp/model.pkl')
+                jb.dump(model_columns, './static/model_temp/model_columns.pkl')
 
-            flash("Modelo entrenado correctamente")
-
-            return redirect('/')
-
+                flash("Modelo entrenado correctamente")
+                
+            except Exception as e:
+                folder_path = './static/model_temp' 
         
+                for file_object in os.listdir(folder_path): 
+                    file_object_path = os.path.join(folder_path, file_object) 
+                    
+                    if os.path.isfile(file_object_path): 
+                        os.unlink(file_object_path) 
+                    else: 
+                        shutil.rmtree(file_object_path)
+
+                flash("ERROR - Ha ocurrido un problema durante el entrenamiento")
+                        
+                return redirect('/formTrain')
+
+            try:
+                shutil.copy('./static/model_temp/train.csv', './static/models/' + model_name + '/train.csv')
+                shutil.copy('./static/model_temp/model.pkl', './static/models/' + model_name + '/model.pkl')
+                shutil.copy('./static/model_temp/model_columns.pkl', './static/models/' + model_name + '/model_columns.pkl')
+
+                try:
+                    mydb = mysql.connector.connect(
+                        host="localhost",
+                        user="root",
+                        password="",
+                        database="mlaas")
+
+                    mycursor = mydb.cursor()
+
+                    sql = "INSERT INTO modelos (tipo, nombre, url) VALUES (%s, %s, %s)"
+                    val = ("Linear Regression", model_name, './static/models/' + model_name)
+                    
+                    mycursor.execute(sql, val)
+
+                    mydb.commit()
+
+                    flash("Modelo '" + model_name + "' guardado en la base de datos correctamente")
+                                
+                    return redirect('/formTrain')
+                        
+                except Exception as ex:
+                    shutil.rmtree('./static/models/' + model_name)
+
+                    flash("ERROR - No se ha podido guardar el modelo: " + model_name +". Por favor, vuelva de nuevo más tarde")
+
+                    return redirect('/formTrain')
+
+                
+            except Exception as exc:
+                shutil.rmtree('./static/models/' + model_name)
+
+                flash("ERROR - No se ha podido guardar el modelo: " + model_name +". Por favor, vuelva de nuevo más tarde")
+                        
+                return redirect('/formTrain')
+
         else:
-            flash("ERROR - Se necesita primero subir el fichero de datos para entrenamiento")
-            
-            return redirect('/')
-    
-    else:
-        clf = jb.load('model.pkl')
-        model_columns = jb.load('model_columns.pkl')
-            
-        flash("Modelo entrenado correctamente")
-            
-        return redirect('/')
+            flash("Es necesario subir un modelo de datos")
+
+            return redirect('/formTrain')
 
 
 @app.route('/predict', methods=['POST'])
 def predict():
     if request.method == 'POST':
-        clf = jb.load('model.pkl')
-        model_columns = jb.load('model_columns.pkl')
+        clf = jb.load('./static/model_temp/model.pkl')
+        model_columns = jb.load('./static/model_temp/model_columns.pkl')
         if clf:
             try:
                 json_ = request.json
@@ -133,8 +262,8 @@ def load_form():
 @app.route('/predict_form', methods=['POST'])
 def predict_form():
     if request.method == 'POST':
-        clf = jb.load('model.pkl')
-        model_columns = jb.load('model_columns.pkl')
+        clf = jb.load('./static/model_temp/model.pkl')
+        model_columns = jb.load('./static/model_temp/model_columns.pkl')
         if clf:
             try:
                 json_ = [float(x) for x in request.form.values()]
@@ -160,7 +289,17 @@ def predict_form():
 
 @app.route('/loadCSVToPredict', methods=['GET'])
 def uploadMassive():
-    return render_template('prediccion_masiva.html')
+    try:
+        df = pd.read_csv('./static/model_temp/train.csv', encoding='latin-1')
+        columns = [str(x) for x in df.columns]
+        columns.pop()
+
+        return render_template('prediccion_masiva.html')
+    
+    except Exception as e:
+        flash("Es necesario subir y entrenar un modelo o cargar un modelo existente")
+
+        return redirect('/')
 
 @app.route('/predictMassive', methods=['POST'])
 def predictMassive():
@@ -177,14 +316,14 @@ def predictMassive():
 
         file_form.save(os.path.join('', file))
         
-        dataset = pd.read_csv(file)
-        dataset['experience'].fillna(0, inplace=True)
-        dataset['test_score'].fillna(dataset['test_score'].mean(), inplace=True)
+        dataset = pd.read_csv(file, encoding='latin-1')
 
-        query = dataset.iloc[:, :3]
+        for col, col_type in dataset.dtypes.items():        
+            dataset[col].fillna(0, inplace=True)
 
-        clf = jb.load('model.pkl')
-        model_columns = jb.load('model_columns.pkl')
+        query = dataset.iloc[:, :]
+
+        clf = jb.load('./static/model_temp/model.pkl')
 
         os.remove(file)
 
@@ -195,7 +334,11 @@ def predictMassive():
                 prediction_round = [round(x, 2) for x in prediction_float]
                 prediction_str = [str(x) for x in prediction_round]
 
-                return jsonify({"prediction": prediction_str})
+                dataset['predict'] = prediction_str
+
+                dataset.to_csv('predict.csv', header=True, index=False)
+                
+                return
             
             except Exception as e:
                 flash("ERROR - Falló la predicción del fichero de datos")
