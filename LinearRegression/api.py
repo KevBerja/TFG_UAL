@@ -7,7 +7,7 @@ import pandas as pd
 import joblib as jb
 import mysql.connector
 
-from flask import Flask, request, jsonify, render_template, redirect, session, flash
+from flask import Flask, request, jsonify, render_template, redirect, session, flash, send_file
 from werkzeug.utils import secure_filename
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
@@ -337,8 +337,8 @@ def predictMassive():
                 dataset['predict'] = prediction_str
 
                 dataset.to_csv('predict.csv', header=True, index=False)
-                
-                return
+
+                return send_file('predict.csv', as_attachment=True, attachment_filename='predict.csv')
             
             except Exception as e:
                 flash("ERROR - Falló la predicción del fichero de datos")
