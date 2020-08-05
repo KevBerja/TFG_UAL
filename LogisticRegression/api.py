@@ -7,7 +7,7 @@ import pandas as pd
 import numpy as np
 import mysql.connector
 
-from flask import Flask, request, jsonify, render_template, redirect, session, flash
+from flask import Flask, request, jsonify, render_template, redirect, session, flash, send_file
 from werkzeug.utils import secure_filename
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
@@ -396,8 +396,11 @@ def predictMassive():
             try:
                 prediction = list(clf.predict(query))
                 prediction_str = [str(i) for i in prediction]
+                
+                query['predict'] = prediction_str
+                query.to_csv('predict.csv', header=True, index=False)
 
-                return jsonify({'prediction': prediction_str})
+                return send_file('predict.csv', as_attachment=True, attachment_filename='predict.csv')
             
             except Exception as e:
                 flash("ERROR - Falló la predicción del fichero de datos")
