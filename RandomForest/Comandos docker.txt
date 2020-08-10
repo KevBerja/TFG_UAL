@@ -4,15 +4,15 @@ docker ps
 
 docker ps -a
 
-docker run -p <puertofisico>:<puertodocker> -d <nombre>
+docker run -p <puertofisico>:<puertodocker> -d <imagen>
 
 docker start
 
-docker stop
+docker stop <iddocker>
 
-docker rm <idcontenedor>
+docker rm <iddocker>
 
-docker rm -f <nombrecontenedor>
+docker rm -f <nombredocker>
 
 docker images
 
