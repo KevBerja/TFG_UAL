@@ -54,9 +54,9 @@ def uploader():
 def loadModel():
     try:
         mydb = mysql.connector.connect(
-            host="localhost",
+            host="db",
             user="root",
-            password="",
+            password="admin",
             database="mlaas")
 
         mycursor = mydb.cursor()
@@ -204,9 +204,9 @@ def train():
 
                 try:
                     mydb = mysql.connector.connect(
-                        host="localhost",
+                        host="db",
                         user="root",
-                        password="",
+                        password="admin",
                         database="mlaas")
 
                     mycursor = mydb.cursor()
