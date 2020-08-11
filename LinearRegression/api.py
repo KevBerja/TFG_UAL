@@ -57,7 +57,7 @@ def loadModel():
         mydb = mysql.connector.connect(
             host="localhost",
             user="root",
-            password="",
+            password="admin",
             database="mlaas")
 
         mycursor = mydb.cursor()

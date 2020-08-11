@@ -1,0 +1,47 @@
+version: '3'
+services:
+  app-home:
+    build:
+      context: ./AppHome
+      dockerfile: Dockerfile    
+    ports:
+    - "8080:80"
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    ports:
+    - "8888:80"
+    restart: on-failure
+
+  db:
+    restart: always
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: 'admin'
+    ports:
+    - "3306:3306"
+    volumes:
+    - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_bin
+
+
+  linear-regression:
+    build:
+      context: ./LinearRegression
+      dockerfile: Dockerfile    
+    ports:
+    - "5000:5000"
+
+  logistic-regression:
+    build:
+      context: ./LogisticRegression
+      dockerfile: Dockerfile    
+    ports:
+    - "5001:5001"
+
+  random-forest:
+    build:
+      context: ./RandomForest
+      dockerfile: Dockerfile    
+    ports:
+    - "5002:5002"
