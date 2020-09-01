@@ -16,6 +16,9 @@ RUN pip3 install --upgrade pip
 #Instala los paquetes y dependencias python definidas en el fichero requeriments.txt
 RUN pip3 install -r requirements.txt
 
+#Puerto por el que se expone el contenedor
+EXPOSE 5001
+
 #Se ejecuta al inicio del arranque del contenedor. El contenedor ejecutara comandos con la instruccion 'python'
 ENTRYPOINT ["python"]
 

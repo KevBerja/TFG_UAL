@@ -2,7 +2,6 @@
 -- version 4.9.2
 -- https://www.phpmyadmin.net/
 --
--- Servidor: 127.0.0.1
 -- Tiempo de generación: 11-08-2020 a las 17:34:53
 -- Versión del servidor: 10.4.10-MariaDB
 -- Versión de PHP: 7.3.12
